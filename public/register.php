@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-=======
 <?php
 
 require 'C:\\Users\\raymon\\OneDrive\\Desktop\\JAVASCRIPT PMD\\Lost-And-Found\\config\\config.php';
@@ -9,9 +7,9 @@ $data = json_decode(file_get_contents("php://input"), TRUE);
 $username = $data['username'];
 $email = $data['email'];
 $password = $data['password'];
-$confirm_password = $data['confirm_password']; // Menerima Konfirmasi Password
+$confirm_password = $data['confirm_password'];
 $full_name = $data['full_name'];
-$phone = $data['phone']; // Pastikan formulir Anda mengirimkan data 'phone' atau hapus ini jika tidak ada
+$phone = $data['phone']; 
 
 // --- VALIDASI TAMBAHAN ---
 if ($password !== $confirm_password) {
@@ -41,4 +39,5 @@ if(mysqli_query($conn, $query)){
 } else {
     echo json_encode(["status"=>"error", "message"=>"Username atau email sudah terdaftar"]);
 }
->>>>>>> Stashed changes
+
+
