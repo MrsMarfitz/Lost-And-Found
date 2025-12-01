@@ -31,7 +31,7 @@
       <aside class="auth-right">
         <div class="auth-hero">
           <h2>Welcome!</h2>
-          <p>Let’s help the campus community — report lost & found items quickly.</p>
+          <p>Let's help the campus community — report lost & found items quickly.</p>
           <a href="login.php" class="btn-outline">Sign In</a>
         </div>
       </aside>
@@ -84,5 +84,3 @@ if(mysqli_query($conn, $query)){
     echo json_encode(["status"=>"error", "message"=>"Username atau email sudah terdaftar"]);
 }
 
-
->>>>>>> 0cdd4e13549f85fc66c5d7a3185ce608f62f738b
