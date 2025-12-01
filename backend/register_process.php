@@ -1,13 +1,14 @@
 <?php
 // Pastikan hanya POST request yang diizinkan
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    // Jika diakses langsung, tampilkan pesan status
-    die("Akses langsung tidak diizinkan."); 
+    // Jika diakses langsung, arahkan ke halaman login
+    header("Location: ../public/login.php"); 
+    exit();
 }
 
 // 1. Panggil file konfigurasi dan koneksi database
-// ROOT_URL sudah didefinisikan di config.php
-require '../../config/config.php'; 
+// PERBAIKAN PATH: Mundur satu level (..)
+require '../config/config.php'; 
 
 // 2. Ambil data dari FORM POST
 $full_name = trim($_POST['nama'] ?? ''); 
@@ -22,13 +23,13 @@ $confirm_password = $_POST['password_confirm'] ?? '';
 
 if (empty($username) || empty($email) || empty($password) || empty($full_name)) {
     $error_msg = "Semua field wajib diisi.";
-    // Redirection dihilangkan sementara untuk debugging
+    // Redirect Gagal dihilangkan untuk debugging
     die("FAILURE (VALIDASI): " . $error_msg); 
 }
 
 if ($password !== $confirm_password) {
     $error_msg = "Password dan Konfirmasi Password tidak cocok.";
-    // Redirection dihilangkan sementara untuk debugging
+    // Redirect Gagal dihilangkan untuk debugging
     die("FAILURE (VALIDASI): " . $error_msg);
 }
 
@@ -36,54 +37,52 @@ if ($password !== $confirm_password) {
 
 $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
 $role = "user"; 
-$token = bin2hex(random_bytes(32)); 
-$expiry = date("Y-m-d H:i:s", strtotime("+24 hours"));
+// Kolom aktivasi dihilangkan agar sesuai dengan struktur database Anda
 
 
 // 3. PREPARED STATEMENT UNTUK INSERT
-$query = "INSERT INTO users (username, email, password_hash, full_name, phone, role, activation_token, activation_expiry)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+// Query disesuaikan agar cocok dengan database tanpa kolom token
+$query = "INSERT INTO users (username, email, password_hash, full_name, phone, role)
+          VALUES (?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($query);
 
 if (!$stmt) {
     // Fatal error saat prepare query
     error_log("MySQL Prepare Error: " . $conn->error);
-    die("FAILURE (SISTEM): Kesalahan preparasi query database.");
+    $error_msg = "Sistem error (Prep).";
+    die("FAILURE (SISTEM): " . $error_msg);
 }
 
-$stmt->bind_param("ssssssss", 
+$stmt->bind_param("ssssss", 
     $username, 
     $email, 
     $hashed_pass, 
     $full_name, 
     $phone, 
-    $role, 
-    $token, 
-    $expiry
+    $role
 );
 
 // 4. EKSEKUSI AMAN ($stmt->execute())
 if ($stmt->execute()) {
     
     // Pendaftaran Berhasil
-    // Output success secara plaintext
-    echo "SUCCESS: Akun berhasil terdaftar di database!";
-    
+    // REDIRECT DIHENTIKAN, GANTI DENGAN PESAN MANUAL
+    echo "<h1>✅ Pendaftaran BERHASIL!</h1>";
+    echo "<p>Akun <b>" . htmlspecialchars($username) . "</b> berhasil dibuat di database.</p>";
+    echo "<p>Silakan klik link di bawah ini untuk menuju halaman Login:</p>";
+    echo "<p><a href='" . ROOT_URL . "public/login.php?status=register_success'>Masuk ke Aplikasi</a></p>";
+    exit();
+
 } else {
     // Pendaftaran Gagal (Database Error)
     
     if ($conn->errno == 1062) {
         $error_msg = "Username atau Email sudah terdaftar.";
     } else {
-        $error_msg = "Terjadi kesalahan database.";
+        $error_msg = "Terjadi kesalahan database: " . $stmt->error;
         error_log("MySQL Execute Error: " . $stmt->error);
     }
     
-    // Output failure secara plaintext
-    die("FAILURE (DATABASE): " . $error_msg);
+    die("<h1>❌ Pendaftaran GAGAL</h1><p>Error: " . $error_msg . "</p>");
 }
-
-$stmt->close();
-$conn->close();
-?>

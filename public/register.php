@@ -1,7 +1,8 @@
 <?php 
-
+// Panggil config untuk session_start() jika diperlukan
 require '../config/config.php';
 
+// Menampilkan pesan error dari proses registrasi yang gagal
 $error_message = "";
 if (isset($_GET['status']) && $_GET['status'] == 'register_failed' && isset($_GET['msg'])) {
     $error_message = "<p style='color:red; text-align:center; font-weight:bold; padding: 10px; border: 1px solid red; border-radius: 4px;'>ERROR: " . htmlspecialchars($_GET['msg']) . "</p>";
@@ -24,9 +25,10 @@ if (isset($_GET['status']) && $_GET['status'] == 'register_failed' && isset($_GE
                 <h1>Create Account</h1>
                 <p class="muted">Buat akun agar bisa melaporkan barang hilang/temuan</p>
 
-                <?php echo $error_message; // Tampilkan pesan error di sini ?>
+                <?php echo $error_message; ?>
 
-                <form action="/Lost-And-Found/backend/register_process.php" method="POST" class="form">
+                <!-- PENTING: Action menggunakan URL absolut PORT 8081 untuk mengatasi error 404 -->
+                <form action="http://localhost:8081/Lost-And-Found/backend/register_process.php" method="POST" class="form">
                     <input name="nama" type="text" placeholder="Nama Lengkap" required>
                     <input name="username" type="text" placeholder="Username" required>
                     <input name="email" type="email" placeholder="Email" required>
