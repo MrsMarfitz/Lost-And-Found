@@ -1,12 +1,10 @@
 <?php
 require_once '../includes/crud_barang.php';
 
-// Cek ID
 if (!isset($_GET['id'])) { header("Location: report_list.php"); exit; }
 $id = $_GET['id'];
 $data = ambilSatuBarang($id);
 
-// Proses Update
 if (isset($_POST['update'])) {
     if (ubahBarang($_POST, $_FILES)) {
         echo "<script>alert('Berhasil Update!'); window.location='report_list.php';</script>";
