@@ -32,13 +32,11 @@ if (isset($_GET['status'])) {
                 <h1>Sign In</h1>
                 <p class="muted">Masuk menggunakan akun kamu</p>
 
-                <?php echo $status_message; // Tampilkan pesan status di sini ?>
+                <?php echo $status_message; ?>
 
                 <form action="../backend/login_process.php" method="POST" class="form">
                     <input name="username_email" type="text" placeholder="Username atau Email" required>
                     <input name="password" type="password" placeholder="Password" required>
-
-                    <!-- Baris untuk 'Remember me' dan 'Lupa password' sudah dihapus -->
                     
                     <button class="btn-primary" type="submit">Sign In</button>
                 </form>
