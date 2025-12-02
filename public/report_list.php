@@ -1,295 +1,191 @@
+<?php
+require_once '../includes/crud_barang.php';
+$data_laporan = tampilkanSemuaBarang();
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Laporan - Lost & Found Campus</title>
+    <title>Daftar Laporan</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
-      /* Styles for report grid */
-      .report-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Responsive grid */
-        gap: 20px;
-        padding: 20px 0;
-      }
+      .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 20px 0; }
+      .report-card-item { width: 100%; height: 260px; border-radius: 10px; overflow: hidden; position: relative; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s ease-in-out; background: #fff; border: 1px solid #eee; }
+      .report-card-item:hover { transform: translateY(-5px); }
+      .report-card-item img { width: 100%; height: 160px; object-fit: cover; }
+      .report-card-content { padding: 10px; }
+      .report-card-overlay { position: absolute; top: 10px; right: 10px; }
+      .status-tag { padding: 4px 8px; border-radius: 5px; font-size: 0.75em; color: white; font-weight: bold; text-transform: uppercase; }
+      .status-tag.lost { background: #e74c3c; } 
+      .status-tag.found { background: #27ae60; } 
 
-      .report-card-item {
-        width: 100%; /* Take full width of grid column */
-        height: 160px; /* Fixed height for consistency */
-        border-radius: 10px;
-        overflow: hidden;
-        position: relative;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        transition: transform 0.2s ease-in-out;
-        background: #fff; /* Fallback background */
-      }
+      /* MODAL STYLES */
+      .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); }
+      .modal-content { background-color: #fefefe; margin: 2% auto; border-radius: 10px; width: 90%; max-width: 700px; position: relative; animation: slideIn 0.3s; padding-bottom: 20px; }
+      .modal-header { position: relative; width: 100%; background: #000; text-align: center; }
+      
+      /* Gambar Utama Besar */
+      .modal-main-img { width: 100%; height: 300px; object-fit: contain; background: #222; }
+      
+      /* Galeri Kecil di Bawah */
+      .modal-gallery { display: flex; gap: 10px; padding: 10px; overflow-x: auto; background: #f9f9f9; border-bottom: 1px solid #eee; justify-content: center; }
+      .gallery-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; cursor: pointer; border: 2px solid transparent; opacity: 0.6; transition: 0.2s; }
+      .gallery-thumb:hover, .gallery-thumb.active { border-color: #3498db; opacity: 1; }
 
-      .report-card-item:hover {
-        transform: translateY(-5px);
-      }
-
-      .report-card-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-
-      .report-card-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
-        color: white;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        min-height: 50%;
-      }
-
-      .report-card-overlay h4 {
-        margin: 0 0 5px 0;
-        font-size: 1.1em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .report-card-overlay .status-tag {
-        background: #555;
-        color: white;
-        padding: 3px 8px;
-        border-radius: 5px;
-        font-size: 0.8em;
-        align-self: flex-start;
-      }
-
-      /* Modal styles - same as dashboard.php */
-      .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1000; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
-        animation: fadeIn 0.3s;
-      }
-
-      .modal-content {
-        background-color: #fefefe;
-        margin: 5% auto; /* 5% from the top and centered */
-        padding: 0; /* Remove default padding */
-        border-radius: 10px;
-        width: 80%; /* Could be more or less, depending on screen size */
-        max-width: 900px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        position: relative;
-        overflow: hidden; /* For rounded corners */
-        animation: slideInUp 0.4s;
-      }
-
-      .modal-header {
-          position: relative;
-          height: 350px; /* Fixed height for image area */
-          overflow: hidden;
-          border-top-left-radius: 10px;
-          border-top-right-radius: 10px;
-      }
-      .modal-header img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-      }
-      .modal-header .close-button {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        color: white;
-        font-size: 30px;
-        font-weight: bold;
-        cursor: pointer;
-        text-shadow: 0 0 5px rgba(0,0,0,0.7);
-        background-color: rgba(0,0,0,0.5);
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .modal-header .close-button:hover,
-      .modal-header .close-button:focus {
-        color: #bbb;
-        text-decoration: none;
-        cursor: pointer;
-      }
-
-      .modal-body {
-          padding: 30px;
-          background-color: #fff;
-      }
-      .modal-body h3 {
-          margin-top: 0;
-          margin-bottom: 15px;
-          font-size: 1.8em;
-          color: #333;
-      }
-      .modal-body p {
-          line-height: 1.6;
-          color: #555;
-          margin-bottom: 10px;
-      }
-      .modal-details {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 15px;
-          margin-top: 20px;
-          padding-top: 15px;
-          border-top: 1px solid #eee;
-      }
-      .modal-details div {
-          font-size: 0.95em;
-      }
-      .modal-details strong {
-          display: block;
-          margin-bottom: 5px;
-          color: #333;
-      }
-      .modal-actions {
-          margin-top: 30px;
-          display: flex;
-          gap: 10px;
-          justify-content: flex-start;
-      }
-      .modal-actions .btn {
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
-        transition: background-color 0.2s ease;
-      }
-      .modal-actions .btn-primary {
-          background-color: #3b82f6;
-          color: white;
-      }
-      .modal-actions .btn-primary:hover {
-          background-color: #2563eb;
-      }
-      .modal-actions .btn-secondary {
-          background-color: #e0e7ff;
-          color: #4f46e5;
-      }
-      .modal-actions .btn-secondary:hover {
-          background-color: #c7d2fe;
-      }
-
-      /* Animations */
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-
-      @keyframes slideInUp {
-        from { transform: translateY(50px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-
+      .close-btn { position: absolute; top: 10px; right: 10px; color: white; font-size: 30px; cursor: pointer; background: rgba(0,0,0,0.5); width: 40px; height: 40px; text-align: center; border-radius: 50%; line-height: 40px; z-index: 10; }
+      .modal-body { padding: 20px; }
+      .modal-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; display: flex; gap: 10px; justify-content: flex-end; }
+      .btn { padding: 10px 20px; border-radius: 5px; text-decoration: none; color: white; font-weight: bold; font-size: 14px; }
+      .btn-edit { background: #f39c12; }
+      .btn-delete { background: #c0392b; }
+      @keyframes slideIn { from {transform: translateY(-50px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
     </style>
 </head>
 <body>
 
     <div class="app">
         <nav class="sidebar">
-            <div class="s-top">
-                <img src="assets/img/logo.png" class="s-logo" alt="logo">
-                <h3>LostFound</h3>
-            </div>
+            <div class="s-top"><img src="assets/img/logo.png" class="s-logo"><h3>LostFound</h3></div>
             <ul class="menu">
                 <li><a href="dashboard.php">Dashboard</a></li>
                 <li><a href="report_create.php">Buat Laporan</a></li>
-                <li class="active">Daftar Laporan</li>
-                <li><a href="profile.php">Profil Saya</a></li>
-                <li><a href="../admin/index.php">Admin Panel</a></li>
+                <li class="active"><a href="report_list.php">Daftar Laporan</a></li>
             </ul>
-            <div class="s-bottom">
-                <img src="assets/img/user.jpg" class="avatar" alt="user">
-                <div>
-                    <div class="small">Pengguna Aktif</div>
-                    <a href="logout.php">Logout</a>
-                </div>
-            </div>
         </nav>
         
         <main class="main">
             <header class="main-head">
-                <h2>Daftar Semua Laporan</h2>
+                <h2>Daftar Laporan</h2>
                 <div class="head-actions">
-                    <input class="search" placeholder="Filter laporan...">
-                    <a href="report_create.php" class="btn-primary small">Laporan Baru</a>
+                    <a href="report_create.php" class="btn-primary small">+ Lapor Baru</a>
                 </div>
             </header>
             
             <div class="card">
-                <h3>Semua Laporan Tersedia</h3>
-                <div class="report-grid">
-                    <div class="report-card-item" data-report-id="104" data-report-title="Kunci Motor Honda" data-report-desc="Kunci motor Honda Vario dengan gantungan kunci Doraemon. Hilang di parkiran barat." data-report-location="Parkiran Barat" data-report-date="2025-11-30" data-report-status="Hilang" data-report-photo="assets/img/kunci_honda.jpg">
-                        <img src="assets/img/kunci_honda.jpg" alt="Kunci Motor Honda">
-                        <div class="report-card-overlay">
-                            <h4>Kunci Motor Honda</h4>
-                            <span class="status-tag red">Hilang</span>
-                        </div>
+                <?php if (empty($data_laporan)) : ?>
+                    <p style="text-align:center; padding: 20px;">Belum ada laporan masuk.</p>
+                <?php else : ?>
+                    <div class="report-grid">
+                        <?php foreach ($data_laporan as $row) : ?>
+                            <?php 
+                                $statusClass = ($row['type'] == 'lost') ? 'lost' : 'found';
+                                // Ambil Thumbnail (Foto Pertama)
+                                $thumb = !empty($row['thumbnail']) ? "uploads/" . $row['thumbnail'] : "assets/img/no-image.jpg";
+                                // Siapkan JSON semua foto untuk dikirim ke JS
+                                $allPhotosJson = htmlspecialchars(json_encode($row['photos_array']));
+                            ?>
+                            <div class="report-card-item" onclick='openModal(this, <?= $allPhotosJson; ?>)'
+                                 data-id="<?= $row['report_id']; ?>"
+                                 data-title="<?= htmlspecialchars($row['title']); ?>"
+                                 data-desc="<?= htmlspecialchars($row['description']); ?>"
+                                 data-loc="<?= htmlspecialchars($row['location_text']); ?>"
+                                 data-date="<?= $row['date_event']; ?>"
+                                 data-type="<?= $row['type']; ?>">
+                                
+                                <img src="<?= $thumb; ?>" alt="Thumbnail">
+                                <div class="report-card-overlay">
+                                    <span class="status-tag <?= $statusClass; ?>"><?= strtoupper($row['type']); ?></span>
+                                </div>
+                                <div class="report-card-content">
+                                    <h4 style="margin:0; font-size:16px;"><?= htmlspecialchars($row['title']); ?></h4>
+                                    <p style="color:#666; font-size:13px; margin-top:5px;"><?= $row['location_text']; ?></p>
+                                    <small style="color:#999;"><?= $row['date_event']; ?></small>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                    <div class="report-card-item" data-report-id="105" data-report-title="Jam Tangan Casio" data-report-desc="Jam tangan Casio digital warna hitam, tali karet. Ditemukan di lantai 2 perpustakaan." data-report-location="Perpustakaan Lt. 2" data-report-date="2025-11-29" data-report-status="Ditemukan" data-report-photo="assets/img/jam_casio.jpg">
-                        <img src="assets/img/jam_casio.jpg" alt="Jam Tangan Casio">
-                        <div class="report-card-overlay">
-                            <h4>Jam Tangan Casio</h4>
-                            <span class="status-tag green">Ditemukan</span>
-                        </div>
-                    </div>
-                    <div class="report-card-item" data-report-id="106" data-report-title="Tas Laptop Merah" data-report-desc="Tas laptop warna merah, merek Asus, dengan beberapa stiker di bagian depan. Hilang di Lab Komputer." data-report-location="Lab Komputer" data-report-date="2025-11-28" data-report-status="Menunggu" data-report-photo="assets/img/tas_laptop_merah.jpg">
-                        <img src="assets/img/tas_laptop_merah.jpg" alt="Tas Laptop Merah">
-                        <div class="report-card-overlay">
-                            <h4>Tas Laptop Merah</h4>
-                            <span class="status-tag orange">Menunggu</span>
-                        </div>
-                    </div>
-                    <div class="report-card-item" data-report-id="107" data-report-title="Kartu Mahasiswa" data-report-desc="Kartu mahasiswa atas nama 'Andi Nugroho', NIM: 12345678. Hilang di area kantin." data-report-location="Area Kantin" data-report-date="2025-11-27" data-report-status="Hilang" data-report-photo="assets/img/kartu_mhs.jpg">
-                        <img src="assets/img/kartu_mhs.jpg" alt="Kartu Mahasiswa">
-                        <div class="report-card-overlay">
-                            <h4>Kartu Mahasiswa</h4>
-                            <span class="status-tag red">Hilang</span>
-                        </div>
-                    </div>
-                    <div class="report-card-item" data-report-id="108" data-report-title="USB Drive 32GB" data-report-desc="Flashdisk 32GB merek SanDisk, warna hitam. Ditemukan di ruang B-102." data-report-location="Ruang B-102" data-report-date="2025-11-26" data-report-status="Ditemukan" data-report-photo="assets/img/flashdisk.jpg">
-                        <img src="assets/img/flashdisk.jpg" alt="USB Drive 32GB">
-                        <div class="report-card-overlay">
-                            <h4>USB Drive 32GB</h4>
-                            <span class="status-tag green">Ditemukan</span>
-                        </div>
-                    </div>
-                    <div class="report-card-item" data-report-id="109" data-report-title="Kacamata Baca" data-report-desc="Kacamata baca bingkai hitam, minus 1.5. Hilang di area parkiran dosen." data-report-location="Parkiran Dosen" data-report-date="2025-11-25" data-report-status="Hilang" data-report-photo="assets/img/kacamata.jpg">
-                        <img src="assets/img/kacamata.jpg" alt="Kacamata Baca">
-                        <div class="report-card-overlay">
-                            <h4>Kacamata Baca</h4>
-                            <span class="status-tag red">Hilang</span>
-                        </div>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
         </main>
     </div>
 
-    <div id="reportModal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <span class="close-button">&times;</span>
-          <img id="modal
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+                <img id="mMainImg" class="modal-main-img" src="" alt="Detail">
+            </div>
+            
+            <div id="mGallery" class="modal-gallery" style="display:none;"></div>
+
+            <div class="modal-body">
+                <h2 id="mTitle" style="margin-top:0;">Judul</h2>
+                <span id="mType" class="status-tag" style="background:#333;">TYPE</span>
+                <p style="margin-top:15px;"><strong>Lokasi:</strong> <span id="mLoc">-</span></p>
+                <p><strong>Tanggal:</strong> <span id="mDate">-</span></p>
+                <hr>
+                <p id="mDesc" style="line-height:1.6;">Deskripsi...</p>
+                
+                <div class="modal-actions">
+                    <a id="btnEdit" href="#" class="btn btn-edit">Edit</a>
+                    <a id="btnDelete" href="#" class="btn btn-delete" onclick="return confirm('Hapus permanen?')">Hapus</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(el, photos) {
+            // 1. Isi Data Teks
+            document.getElementById('mTitle').innerText = el.getAttribute('data-title');
+            document.getElementById('mDesc').innerText = el.getAttribute('data-desc');
+            document.getElementById('mLoc').innerText = el.getAttribute('data-loc');
+            document.getElementById('mDate').innerText = el.getAttribute('data-date');
+            
+            var type = el.getAttribute('data-type');
+            var badge = document.getElementById('mType');
+            badge.innerText = type.toUpperCase();
+            badge.className = "status-tag " + (type == 'lost' ? 'lost' : 'found');
+
+            var id = el.getAttribute('data-id');
+            document.getElementById('btnEdit').href = "report_edit.php?id=" + id;
+            document.getElementById('btnDelete').href = "report_delete.php?id=" + id;
+
+            // 2. Logic Foto Galeri
+            var galleryContainer = document.getElementById('mGallery');
+            var mainImg = document.getElementById('mMainImg');
+            galleryContainer.innerHTML = ""; // Bersihkan galeri lama
+
+            if (photos && photos.length > 0 && photos[0] !== "") {
+                // Set gambar utama pakai foto pertama
+                mainImg.src = "uploads/" + photos[0];
+                
+                // Jika foto lebih dari 1, tampilkan galeri kecil
+                if (photos.length > 1) {
+                    galleryContainer.style.display = "flex";
+                    photos.forEach(function(photoName) {
+                        var img = document.createElement("img");
+                        img.src = "uploads/" + photoName;
+                        img.className = "gallery-thumb";
+                        // Klik thumb -> Ganti gambar utama
+                        img.onclick = function() {
+                            mainImg.src = this.src;
+                            // Reset active class
+                            document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+                            this.classList.add('active');
+                        };
+                        galleryContainer.appendChild(img);
+                    });
+                } else {
+                    galleryContainer.style.display = "none";
+                }
+            } else {
+                // Kalau gak ada foto sama sekali
+                mainImg.src = "assets/img/no-image.jpg";
+                galleryContainer.style.display = "none";
+            }
+
+            document.getElementById('detailModal').style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = "none";
+        }
+        window.onclick = function(e) {
+            if(e.target == document.getElementById('detailModal')) closeModal();
+        }
+    </script>
+</body>
+</html>

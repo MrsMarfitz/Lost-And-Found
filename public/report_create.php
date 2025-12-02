@@ -1,3 +1,18 @@
+<?php
+// 1. Panggil Mesin CRUD
+require_once '../includes/crud_barang.php';
+
+// 2. Logic Simpan Data
+if (isset($_POST['kirim'])) {
+    // Fungsi tambahBarang sudah kita modif untuk baca input 'judul', 'deskripsi', dll.
+    if (tambahBarang($_POST, $_FILES)) {
+        echo "<script>alert('Laporan Berhasil Dibuat!'); window.location='report_list.php';</script>";
+    } else {
+        echo "<script>alert('Gagal membuat laporan.');</script>";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,16 +21,10 @@
     <title>Buat Laporan Baru - Lost & Found Campus</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
-      /* Tambahan CSS sederhana untuk form */
       .form-group { margin-bottom: 15px; }
       .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #475569; }
       .form-group input, .form-group textarea, .form-group select { 
-        width: 100%; 
-        background:#f6f7fb; 
-        border:1px solid #e6e9f1; 
-        padding:12px 14px; 
-        border-radius:10px; 
-        font-size:15px;
+        width: 100%; background:#f6f7fb; border:1px solid #e6e9f1; padding:12px 14px; border-radius:10px; font-size:15px;
       }
       .form-group textarea { resize: vertical; min-height: 100px; }
     </style>
@@ -30,10 +39,9 @@
             </div>
             <ul class="menu">
                 <li><a href="dashboard.php">Dashboard</a></li>
-                <li class="active">Buat Laporan</li>
+                <li class="active"><a href="report_create.php">Buat Laporan</a></li>
                 <li><a href="report_list.php">Daftar Laporan</a></li>
                 <li><a href="profile.php">Profil Saya</a></li>
-                <li><a href="../admin/index.php">Admin Panel</a></li>
             </ul>
             <div class="s-bottom">
                 <img src="assets/img/user.jpg" class="avatar" alt="user">
@@ -50,7 +58,7 @@
             </header>
             
             <div class="card">
-              <form action="../backend/report_process.php" method="POST" enctype="multipart/form-data">
+              <form action="" method="POST" enctype="multipart/form-data">
                 
                 <div class="form-group">
                   <label for="jenis">Jenis Laporan</label>
@@ -73,16 +81,20 @@
                 
                 <div class="form-group">
                   <label for="lokasi">Lokasi Kejadian/Penemuan</label>
-                  <input name="lokasi" id="lokasi" type="text" placeholder="Contoh: Gedung Bonaventura Lantai 3 Ruang 301" required>
-                  <p class="muted" style="margin-top: 5px;">*Fitur Geolocation akan ditambahkan untuk melacak lokasi terkini.</p>
+                  <input name="lokasi" id="lokasi" type="text" placeholder="Contoh: Gedung B Lantai 3" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Tanggal Kejadian</label>
+                    <input name="date_event" type="date" required>
                 </div>
                 
                 <div class="form-group">
                   <label for="foto">Unggah Foto Barang (Opsional)</label>
-                  <input name="foto" id="foto" type="file" accept="image/*">
+                  <input name="foto[]" id="foto" type="file" accept="image/*" multiple> 
                 </div>
                 
-                <button class="btn-primary" type="submit" style="margin-top: 20px;">Kirim Laporan</button>
+                <button class="btn-primary" type="submit" name="kirim" style="margin-top: 20px;">Kirim Laporan</button>
               </form>
             </div>
         </main>
