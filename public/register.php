@@ -1,86 +1,57 @@
+<?php 
+// Panggil config untuk session_start() jika diperlukan
+require '../config/config.php';
+
+// Menampilkan pesan error dari proses registrasi yang gagal
+$error_message = "";
+if (isset($_GET['status']) && $_GET['status'] == 'register_failed' && isset($_GET['msg'])) {
+    $error_message = "<p style='color:red; text-align:center; font-weight:bold; padding: 10px; border: 1px solid red; border-radius: 4px;'>ERROR: " . htmlspecialchars($_GET['msg']) . "</p>";
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Register - Lost & Found Campus</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Register - Lost & Found Campus</title>
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="bg-gradient">
 
-  <main class="auth-wrap">
-    <div class="auth-card">
-      <div class="auth-left">
-        <img src="assets/img/logo.png" alt="logo" class="brand">
-        <h1>Create Account</h1>
-        <p class="muted">Buat akun agar bisa melaporkan barang hilang/temuan</p>
+    <main class="auth-wrap">
+        <div class="auth-card">
+            <div class="auth-left">
+                <img src="assets/img/logo.png" alt="logo" class="brand">
+                <h1>Create Account</h1>
+                <p class="muted">Buat akun agar bisa melaporkan barang hilang/temuan</p>
 
-        <form action="../backend/register_process.php" method="POST" class="form">
-          <input name="nama" type="text" placeholder="Nama Lengkap" required>
-          <input name="username" type="text" placeholder="Username" required>
-          <input name="email" type="email" placeholder="Email" required>
-          <input name="password" type="password" placeholder="Password" required>
-          <input name="password_confirm" type="password" placeholder="Konfirmasi Password" required>
+                <?php echo $error_message; ?>
 
-          <button class="btn-primary" type="submit">Create Account</button>
-        </form>
+                <!-- PENTING: Action menggunakan URL absolut PORT 8081 untuk mengatasi error 404 -->
+                <form action="http://localhost:8081/Lost-And-Found/backend/register_process.php" method="POST" class="form">
+                    <input name="nama" type="text" placeholder="Nama Lengkap" required>
+                    <input name="username" type="text" placeholder="Username" required>
+                    <input name="email" type="email" placeholder="Email" required>
+                    <input name="phone" type="text" placeholder="Nomor Telepon" required>
+                    <input name="password" type="password" placeholder="Password" required>
+                    <input name="password_confirm" type="password" placeholder="Konfirmasi Password" required>
+                    
+                    <button class="btn-primary" type="submit">Create Account</button>
+                </form>
 
-        <p class="muted center">Sudah punya akun? <a href="login.php">Login</a></p>
-      </div>
+                <p class="muted center">Sudah punya akun? <a href="login.php">Login</a></p>
+            </div>
 
-      <aside class="auth-right">
-        <div class="auth-hero">
-          <h2>Welcome!</h2>
-          <p>Let's help the campus community — report lost & found items quickly.</p>
-          <a href="login.php" class="btn-outline">Sign In</a>
+            <aside class="auth-right">
+                <div class="auth-hero">
+                    <h2>Welcome!</h2>
+                    <p>Let's help the campus community — report lost & found items quickly.</p>
+                    <a href="login.php" class="btn-outline">Sign In</a>
+                </div>
+            </aside>
         </div>
-      </aside>
-    </div>
-  </main>
+    </main>
 
 <script src="assets/js/app.js"></script>
 </body>
 </html>
-=======
-<?php
-
-require 'C:\\Users\\raymon\\OneDrive\\Desktop\\JAVASCRIPT PMD\\Lost-And-Found\\config\\config.php';
-
-$data = json_decode(file_get_contents("php://input"), TRUE);
-
-$username = $data['username'];
-$email = $data['email'];
-$password = $data['password'];
-$confirm_password = $data['confirm_password'];
-$full_name = $data['full_name'];
-$phone = $data['phone']; 
-
-// --- VALIDASI TAMBAHAN ---
-if ($password !== $confirm_password) {
-    echo json_encode(["status" => "error", "message" => "Password dan Konfirmasi Password tidak cocok."]);
-    exit();
-}
-// --- AKHIR VALIDASI ---
-
-$hashed_pass = password_hash($password, PASSWORD_BCRYPT);
-$role = "user";
-$token = bin2hex(random_bytes(32));
-$expiry = date("Y-m-d H:i:s", strtotime("+24 hours")); // token berlaku 24 jam
-
-$query = "INSERT INTO users (username, email, password_hash, full_name, phone, role, activation_token, activation_expiry)
-          VALUES ('$username', '$email', '$hashed_pass', '$full_name', '$phone', '$role', '$token', '$expiry')";
-
-if(mysqli_query($conn, $query)){
-    $verify_link = "http://localhost/api/verify.php?token=$token";
-
-    mail($email,
-         "Aktivasi Akun Lost & Found",
-         "Silahkan aktivasi akun dengan klik: $verify_link",
-         "Content-type:text/html;charset=UTF-8"
-    );
-
-    echo json_encode(["status"=>"ok", "message"=>"Registrasi berhasil! Silahkan cek email aktivasi."]);
-} else {
-    echo json_encode(["status"=>"error", "message"=>"Username atau email sudah terdaftar"]);
-}
-
