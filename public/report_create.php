@@ -1,10 +1,7 @@
 <?php
-// 1. Panggil Mesin CRUD
 require_once '../includes/crud_barang.php';
 
-// 2. Logic Simpan Data
 if (isset($_POST['kirim'])) {
-    // Fungsi tambahBarang sudah kita modif untuk baca input 'judul', 'deskripsi', dll.
     if (tambahBarang($_POST, $_FILES)) {
         echo "<script>alert('Laporan Berhasil Dibuat!'); window.location='report_list.php';</script>";
     } else {
