@@ -55,8 +55,11 @@ if ($result->num_rows === 1) {
         $stmt->close();
         $conn->close();
         
-        // 4. Arahkan ke Dashboard menggunakan ROOT_URL
-        header("Location: " . ROOT_URL . "public/index.php"); 
+        // 4. Arahkan ke Dashboard (Pakai JS biar aman dari error port)
+        echo "<script>
+            alert('Login Berhasil! Selamat Datang, " . htmlspecialchars($user['username']) . "');
+            window.location.href = '../public/index.php';
+        </script>";
         exit();
 
     } else {
@@ -64,7 +67,10 @@ if ($result->num_rows === 1) {
         $error_msg = "Username/Email atau Password salah.";
         $stmt->close();
         $conn->close();
-        header("Location: " . ROOT_URL . "public/login.php?status=login_failed&msg=" . urlencode($error_msg));
+        echo "<script>
+            alert('Username atau Password Salah!');
+            window.history.back();
+        </script>";
         exit();
     }
 } else {
@@ -72,6 +78,10 @@ if ($result->num_rows === 1) {
     $error_msg = "Username/Email atau Password salah.";
     $stmt->close();
     $conn->close();
-    header("Location: " . ROOT_URL . "public/login.php?status=login_failed&msg=" . urlencode($error_msg));
+    echo "<script>
+        alert('Akun tidak ditemukan!');
+        window.history.back();
+    </script>";
     exit();
+    
 }

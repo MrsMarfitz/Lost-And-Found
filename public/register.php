@@ -28,7 +28,7 @@ if (isset($_GET['status']) && $_GET['status'] == 'register_failed' && isset($_GE
                 <?php echo $error_message; ?>
 
                 <!-- PENTING: Action menggunakan URL absolut PORT 8081 untuk mengatasi error 404 -->
-                <form action="http://localhost:8081/Lost-And-Found/backend/register_process.php" method="POST" class="form">
+                <form action="..Lost-And-Found/backend/register_process.php" method="POST" class="form">
                     <input name="nama" type="text" placeholder="Nama Lengkap" required>
                     <input name="username" type="text" placeholder="Username" required>
                     <input name="email" type="email" placeholder="Email" required>

@@ -10,6 +10,6 @@ if ($conn->connect_error) {
 }
 $conn->set_charset("utf8mb4");
 
-define('ROOT_URL', 'http://localhost:8081/Lost-And-Found/');
+define('ROOT_URL', 'http://localhost/Lost-And-Found/');
 
 session_start();
