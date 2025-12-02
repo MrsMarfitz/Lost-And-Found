@@ -12,4 +12,3 @@ $conn->set_charset("utf8mb4");
 
 define('ROOT_URL', 'http://localhost/Lost-And-Found/');
 
-session_start();

@@ -1,10 +1,32 @@
+<?php
+require_once "auth.php";
+require_once "../config/config.php";
+
+$table = "reports";
+$typeCol = "type";
+$statusCol = "status";
+
+// cek tabel ada atau belum
+$check = $conn->query("SHOW TABLES LIKE '$table'");
+if ($check && $check->num_rows > 0) {
+  $total = $conn->query("SELECT COUNT(*) AS c FROM $table")->fetch_assoc()['c'];
+  $lost  = $conn->query("SELECT COUNT(*) AS c FROM $table WHERE $typeCol='lost'")->fetch_assoc()['c'];
+  $found = $conn->query("SELECT COUNT(*) AS c FROM $table WHERE $typeCol='found'")->fetch_assoc()['c'];
+  $pending = $conn->query("SELECT COUNT(*) AS c FROM $table WHERE $statusCol='pending'")->fetch_assoc()['c'];
+} else {
+  // dummy buat presentasi kalau tabel belum ada
+  $total = 120; $lost = 70; $found = 50; $pending = 12;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Admin Dashboard - Lost & Found Campus</title>
-  <link rel="stylesheet" href="../public/assets/css/style.css"> </head>
+  <link rel="stylesheet" href="../public/assets/css/style.css">
+</head>
 <body>
 
   <div class="app">
@@ -25,7 +47,7 @@
         <img src="../public/assets/img/user.jpg" class="avatar" alt="user">
         <div>
           <div class="small">Admin</div>
-          <a href="../public/logout.php">Logout</a>
+          <a href="logout.php">Logout</a>
         </div>
       </div>
     </nav>
@@ -36,43 +58,20 @@
       </header>
 
       <section class="grid">
-        <div class="card stat" style="grid-column: span 1;">
-          <h3>Total Laporan</h3><div class="big">120</div>
+        <div class="card stat">
+          <h3>Total Laporan</h3><div class="big"><?= $total ?></div>
         </div>
-        <div class="card stat" style="grid-column: span 1;">
-          <h3>Laporan Baru Hari Ini</h3><div class="big">7</div>
+        <div class="card stat">
+          <h3>Total Lost</h3><div class="big"><?= $lost ?></div>
         </div>
-        <div class="card stat" style="grid-column: span 1;">
-          <h3>Pengguna Baru</h3><div class="big">15</div>
+        <div class="card stat">
+          <h3>Total Found</h3><div class="big"><?= $found ?></div>
         </div>
-        <div class="card stat" style="grid-column: span 1;">
-          <h3>Laporan Perlu Aksi</h3><div class="big" style="color:#ef4444;">12</div>
+        <div class="card stat">
+          <h3>Laporan Perlu Aksi</h3><div class="big" style="color:#ef4444;"><?= $pending ?></div>
         </div>
       </section>
 
-      <section class="cards-list">
-        <div class="card">
-          <h3>Laporan Terbaru (Perlu Verifikasi)</h3>
-          <table class="table">
-            <thead><tr><th>ID</th><th>Judul</th><th>Jenis</th><th>Pelapor</th><th>Tanggal</th><th>Aksi</th></tr></thead>
-            <tbody>
-              <tr><td>#110</td><td>Smartphone Samsung</td><td>Lost</td><td>Jono</td><td>2025-12-01</td><td><a href="reports.php?id=110">Lihat/Verifikasi</a></td></tr>
-              <tr><td>#111</td><td>Buku Paket Biologi</td><td>Found</td><td>Siti</td><td>2025-12-01</td><td><a href="reports.php?id=111">Lihat/Verifikasi</a></td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="card">
-          <h3>Aktivitas Pengguna Baru</h3>
-          <table class="table">
-            <thead><tr><th>ID</th><th>Nama</th><th>Email</th><th>Tanggal Daftar</th><th>Aktivasi</th></tr></thead>
-            <tbody>
-              <tr><td>#50</td><td>Budi</td><td>budi@mail.com</td><td>2025-12-01</td><td><span class="tag orange">Pending</span></td></tr>
-              <tr><td>#49</td><td>Ani</td><td>ani@mail.com</td><td>2025-11-30</td><td><span class="tag green">Aktif</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
     </main>
   </div>
 
