@@ -1,9 +1,8 @@
 <?php
-// --- Bagian 1: Koneksi Database (Wajib Ada) ---
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db = "lost_and_found_db"; // PASTIKAN NAMA DB INI SAMA PERSIS DENGAN NAMA DI PHPMYADMIN!
+$db = "lost_and_found_db";
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
