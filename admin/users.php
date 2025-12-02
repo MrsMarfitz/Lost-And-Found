@@ -1,3 +1,6 @@
+<?php
+require_once "auth.php";
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -24,7 +27,7 @@
                 <img src="../public/assets/img/user.jpg" class="avatar" alt="user">
                 <div>
                     <div class="small">Admin</div>
-                    <a href="../public/logout.php">Logout</a>
+                    <a href="logout.php">Logout</a>
                 </div>
             </div>
         </nav>
