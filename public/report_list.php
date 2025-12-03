@@ -9,8 +9,10 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Ambil semua laporan (bisa difilter statusnya nanti)
-$query = "SELECT * FROM reports ORDER BY created_at DESC";
+// PERBAIKAN QUERY: 
+// Mengambil semua data reports. 
+// ASUMSI: Kolom tanggal kejadian yang diinput user adalah 'incident_date'.
+$query = "SELECT * FROM reports ORDER BY incident_date DESC, created_at DESC";
 $result = $conn->query($query);
 ?>
 
@@ -88,14 +90,18 @@ $result = $conn->query($query);
                             <tr>
                                 <td>
                                 <?php 
-                                // Pastikan path 'uploads/' sesuai dengan lokasi penyimpanan file kamu
+                                // Path foto untuk kolom 'photo'
+                                // Menggunakan "../uploads/" jika file ini ada di subfolder (misalnya 'public/')
                                 $foto = !empty($row['photo']) ? "uploads/".$row['photo'] : "assets/img/placeholder.jpg"; 
                                 ?>
                                 <img src="<?php echo $foto; ?>" width="50" height="50" style="object-fit:cover; border-radius:5px;">
                                 </td>
                                 <td><?php echo htmlspecialchars($row['title']); ?></td>
                                 <td><?php echo htmlspecialchars($row['location']); ?></td>
-                                <td><?php echo date('d M Y', strtotime($row['created_at'])); ?></td>
+                                
+                                <!-- PERBAIKAN INTI DI SINI: MENGGUNAKAN incident_date -->
+                                <td><?php echo date('d M Y', strtotime($row['incident_date'])); ?></td>
+                                
                                 <td>
                                     <?php 
                                         $badge = 'bg-selesai';
@@ -105,7 +111,7 @@ $result = $conn->query($query);
                                     <span class="badge <?php echo $badge; ?>"><?php echo $row['status']; ?></span>
                                 </td>
                                 <td>
-                                    <!-- Perhatikan bagian href="..." -->
+                                    <!-- Link tombol Detail sudah benar menuju report_edit.php dengan membawa ID -->
                                     <a href="report_edit.php?id=<?php echo $row['report_id']; ?>" class="btn-sm">Detail</a>
                                 </td>
                             </tr>
