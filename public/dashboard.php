@@ -261,13 +261,31 @@ if (!isset($_SESSION['user_id'])) {
     </nav>
 
     <main class="main">
-      <header class="main-head">
+      <main class="main">
+    <header class="main-head">
         <h2>Dashboard Pengguna</h2>
-        <div class="head-actions">
-          <input class="search" placeholder="Cari barang...">
-          <a href="report_create.php" class="btn-primary small">Laporan Baru</a>
+        </header>
+
+    <?php if (isset($_GET['status']) && $_GET['status'] == 'success'): ?>
+        <div style="background: #d1fae5; color: #065f46; padding: 15px; border-radius: 8px; border: 1px solid #34d399; margin-bottom: 20px; text-align: center; font-weight: bold;">
+            ✅ <?php echo htmlspecialchars($_GET['msg'] ?? 'Login Berhasil!'); ?>
         </div>
-      </header>
+        
+        <script>
+            setTimeout(function() {
+                // Mencari elemen alert dan menghapusnya pelan-pelan
+                let alertBox = document.querySelector('div[style*="background: #d1fae5"]');
+                if (alertBox) {
+                    alertBox.style.transition = "opacity 0.5s";
+                    alertBox.style.opacity = "0";
+                    setTimeout(() => alertBox.remove(), 500);
+                }
+                // Bersihkan URL biar kalau direfresh notifnya gak muncul lagi
+                window.history.replaceState(null, null, window.location.pathname);
+            }, 3000);
+        </script>
+    <?php endif; ?>
+
 
       <section class="grid">
         <div class="card stat">
