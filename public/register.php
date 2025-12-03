@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <?php 
 // Panggil config untuk session_start() jika diperlukan
 require '../config/config.php';
@@ -6,6 +7,17 @@ require '../config/config.php';
 $error_message = "";
 if (isset($_GET['status']) && $_GET['status'] == 'register_failed' && isset($_GET['msg'])) {
     $error_message = "<p style='color:red; text-align:center; font-weight:bold; padding: 10px; border: 1px solid red; border-radius: 4px;'>ERROR: " . htmlspecialchars($_GET['msg']) . "</p>";
+=======
+<?php
+
+require __DIR__ . '/../config/config.php';
+// Tidak perlu require db_connect.php di sini karena halaman ini cuma menampilkan FORM HTML
+
+$status_message = '';
+// Menangkap pesan error dari backend jika ada
+if (isset($_GET['status']) && $_GET['status'] == 'failed' && isset($_GET['msg'])) {
+    $status_message = 'ERROR: ' . htmlspecialchars($_GET['msg']);
+>>>>>>> Stashed changes
 }
 ?>
 <!DOCTYPE html>
@@ -27,6 +39,7 @@ if (isset($_GET['status']) && $_GET['status'] == 'register_failed' && isset($_GE
 
                 <?php echo $error_message; ?>
 
+<<<<<<< Updated upstream
                 <!-- PENTING: Action menggunakan URL absolut PORT 8081 untuk mengatasi error 404 -->
                 <form action="http://localhost:8081/Lost-And-Found/backend/register_process.php" method="POST" class="form">
                     <input name="nama" type="text" placeholder="Nama Lengkap" required>
@@ -40,6 +53,32 @@ if (isset($_GET['status']) && $_GET['status'] == 'register_failed' && isset($_GE
                 </form>
 
                 <p class="muted center">Sudah punya akun? <a href="login.php">Login</a></p>
+=======
+        <form action="../backend/register_process.php" method="POST">
+            
+            <div class="input-box">
+                <input type="text" name="nama" placeholder="Nama Lengkap" required>
+            </div>
+            
+            <div class="input-box">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            
+            <div class="input-box">
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+
+            <div class="input-box">
+                <input type="text" name="phone" placeholder="Nomor HP / WhatsApp" required>
+            </div>
+
+            <div class="input-box">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            
+            <div class="input-box">
+                <input type="password" name="password_confirm" placeholder="Konfirmasi Password" required>
+>>>>>>> Stashed changes
             </div>
 
             <aside class="auth-right">
