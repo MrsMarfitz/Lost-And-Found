@@ -1,9 +1,15 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-  session_start();
+session_start();
+
+// Cek apakah sudah login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
 }
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-  header("Location: login.php");
-  exit;
+// Cek apakah role adalah admin
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    // Kalau bukan admin, lempar ke dashboard user biasa
+    header("Location: ../public/dashboard.php");
+    exit();
 }
