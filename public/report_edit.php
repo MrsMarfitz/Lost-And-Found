@@ -24,8 +24,8 @@ $msg = "";
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Ambil data dari form
     $title = $_POST['title'];
-    $location = $_POST['location']; // Sesuai nama kolom baru
-    $incident_date = $_POST['incident_date']; // Sesuai nama kolom baru
+    $location = $_POST['location'];
+    $incident_date = $_POST['incident_date'];
     $description = $_POST['description'];
     $status = $_POST['status'];
     $type = $_POST['type'];
@@ -35,17 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     // Cek apakah user upload foto baru?
     if (!empty($_FILES['photo']['name'])) {
-        $target_dir = "uploads/"; // Folder uploads ada di sebelah file ini (public/uploads)
+        $target_dir = "uploads/"; 
         
-        // Buat nama file unik agar tidak bentrok
         $file_extension = pathinfo($_FILES["photo"]["name"], PATHINFO_EXTENSION);
         $new_filename = uniqid() . '.' . $file_extension;
         $target_file = $target_dir . $new_filename;
         
-        // Coba upload
         if (move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file)) {
-            // Jika sukses upload, siapkan query update kolom photo
-            // Simpan HANYA nama filenya ke database, bukan full path
             $photo_sql = ", photo = '$new_filename'"; 
         } else {
             $msg = "<div style='color:red; margin-bottom:10px;'>Gagal mengupload gambar baru.</div>";
@@ -53,7 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // --- Query Update Database ---
-    // Perhatikan: Kita menyisipkan $photo_sql di tengah query
     $query = "UPDATE reports SET 
               title = '$title',
               location = '$location',
@@ -72,7 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // 4. AMBIL DATA LAMA
-// Query ini akan otomatis mengisi form saat halaman dibuka
 $query_get = "SELECT * FROM reports WHERE report_id = '$report_id'";
 $result = $conn->query($query_get);
 
@@ -92,7 +86,6 @@ $data = $result->fetch_assoc();
     <title>Edit Laporan - Lost & Found</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
-        /* CSS Tambahan agar form rapi */
         .edit-container {
             background: white;
             padding: 30px;
@@ -127,6 +120,18 @@ $data = $result->fetch_assoc();
             border-radius: 4px;
             margin-right: 10px;
         }
+        .btn-delete {
+            background-color: #e74a3b; /* Warna Merah */
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-left: 10px; 
+            float: right; 
+        }
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
         .img-preview {
             max-width: 200px;
             border-radius: 5px;
@@ -139,10 +144,8 @@ $data = $result->fetch_assoc();
 <body>
 
 <div class="app">
-    <!-- SIDEBAR (Sesuaikan menu dengan report_list.php) -->
     <nav class="sidebar">
         <div class="s-top">
-            <!-- Asumsi path logo -->
             <img src="assets/img/logo.png" class="s-logo" alt="logo">
             <h3>LostFound</h3>
         </div>
@@ -163,7 +166,6 @@ $data = $result->fetch_assoc();
         <div class="edit-container">
             <?php echo $msg; ?>
 
-            <!-- enctype="multipart/form-data" WAJIB ada untuk upload foto -->
             <form action="" method="POST" enctype="multipart/form-data">
                 
                 <div class="form-group">
@@ -206,7 +208,6 @@ $data = $result->fetch_assoc();
                 <div class="form-group">
                     <label>Foto Barang (Saat Ini)</label>
                     <?php 
-                        // Cek apakah ada foto di database
                         if (!empty($data['photo'])) {
                             echo '<img src="uploads/'.$data['photo'].'" class="img-preview" alt="Foto Laporan">';
                         } else {
@@ -217,13 +218,18 @@ $data = $result->fetch_assoc();
                     <label>Ganti Foto (Biarkan kosong jika tidak ingin mengganti)</label>
                     <input type="file" name="photo" class="form-control">
                 </div>
-
+                
                 <div style="margin-top: 30px;">
                     <a href="report_list.php" class="btn-back">Kembali</a>
                     <button type="submit" class="btn-save">Simpan Perubahan</button>
+                    
+                    <a href="report_delete.php?id=<?php echo $report_id; ?>" 
+                       class="btn-delete"
+                       onclick="return confirm('Apakah Anda yakin ingin menghapus laporan ini? Data dan foto akan dihapus permanen.');">
+                       Hapus Laporan
+                    </a>
                 </div>
-
-            </form>
+                </form>
         </div>
     </main>
 </div>
