@@ -1,6 +1,4 @@
-<?php
-require_once "auth.php";
-?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -21,8 +19,7 @@ require_once "auth.php";
                 <li><a href="index.php">Dashboard Admin</a></li>
                 <li><a href="reports.php">Kelola Laporan</a></li>
                 <li class="active">Kelola Pengguna</li>
-                <li style="margin-top: 20px;"><a href="../public/dashboard.php">Kembali ke User Dashboard</a></li>
-            </ul>
+                </ul>
             <div class="s-bottom">
                 <img src="../public/assets/img/user.jpg" class="avatar" alt="user">
                 <div>

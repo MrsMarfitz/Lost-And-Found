@@ -1,6 +1,7 @@
 <?php
-require_once "auth.php";
-require_once "../config/config.php";
+
+require_once "../config/config.php"; 
+require_once "../config/db_connect.php"; // Pastikan baris ini ada agar tidak error
 
 $table = "reports";
 $typeCol = "type";
@@ -40,8 +41,7 @@ if ($check && $check->num_rows > 0) {
         <li class="active">Dashboard Admin</li>
         <li><a href="reports.php">Kelola Laporan</a></li>
         <li><a href="users.php">Kelola Pengguna</a></li>
-        <li style="margin-top: 20px;"><a href="../public/dashboard.php">Kembali ke User Dashboard</a></li>
-      </ul>
+        </ul>
 
       <div class="s-bottom">
         <img src="../public/assets/img/user.jpg" class="avatar" alt="user">

@@ -1,25 +1,30 @@
 <?php
-session_start();
+// Tangkap pesan error dari URL
+$pesan_error = '';
+$pesan_sukses = '';
 
-require __DIR__ . '/../config/config.php';
-require __DIR__ . '/../config/db_connect.php';
-
-$status_message = '';
 if (isset($_GET['status'])) {
-    if ($_GET['status'] == 'registered') {
-        $status_message = 'Pendaftaran berhasil! Silakan Login.';
-    } elseif ($_GET['status'] == 'login_failed' && isset($_GET['msg'])) {
-        $status_message = 'ERROR: ' . htmlspecialchars($_GET['msg']);
+    if ($_GET['status'] == 'login_failed' && isset($_GET['msg'])) {
+        $pesan_error = htmlspecialchars($_GET['msg']);
+    } else if ($_GET['status'] == 'success') {
+        $pesan_sukses = "Registrasi Berhasil! Silakan Login.";
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Lost & Found Campus</title>
+    <title>Login - Lost & Found</title>
     <link rel="stylesheet" href="assets/css/auth.css">
+
+    <style>
+        .alert { padding: 12px; margin-bottom: 20px; border-radius: 8px; font-size: 14px; text-align: center; font-weight: bold; }
+        .alert-danger { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+        .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+    </style>
 </head>
 <body>
 
@@ -28,40 +33,46 @@ if (isset($_GET['status'])) {
         <h2 class="title">Sign In</h2>
         <p>Masuk menggunakan akun kamu</p>
 
-        <?php if (!empty($status_message)): ?>
-            <div style="margin:10px 0; padding:10px; border-radius:8px; background:#ffecec; color:#b91c1c; font-size:14px;">
-                <?php echo $status_message; ?>
+        <?php if (!empty($pesan_error)): ?>
+            <div class="alert alert-danger">
+                ⚠️ <?php echo $pesan_error; ?>
             </div>
         <?php endif; ?>
 
-        <form action="check_user.php" method="POST">
+        <?php if (!empty($pesan_sukses)): ?>
+            <div class="alert alert-success">
+                ✅ <?php echo $pesan_sukses; ?>
+            </div>
+        <?php endif; ?>
+
+        <form action="../backend/login_process.php" method="POST">
+            
             <div class="input-box">
                 <input type="text" name="username_email" placeholder="Username atau Email" required>
             </div>
+
             <div class="input-box">
                 <input type="password" name="password" placeholder="Password" required>
             </div>
 
-            <div style="margin-bottom:10px; font-size:12px;">
-                <label>
-                    <input type="checkbox" name="remember"> Remember me
-                </label>
+            <div style="text-align: left; margin-top: 10px; font-size: 14px; color: #666;">
+                <input type="checkbox" id="remember"> <label for="remember">Ingat Saya</label>
             </div>
 
-            <button type="submit" class="btn">Sign In</button>
+            <button type="submit" class="btn">Masuk</button>
 
-            <p style="margin-top:12px; font-size:14px;">
+            <p style="margin-top:15px; text-align:center;">
                 Belum punya akun? <a href="register.php">Daftar</a>
             </p>
         </form>
     </div>
 
     <div class="side-box">
-        <div>
+        <div style="text-align: center;">
             <img src="assets/img/logo.png" alt="Logo" style="width:90px; margin-bottom:25px;">
             <h2>Hello, Friend!</h2>
-            <p>Register with your personal details to use all features of Lost & Found Campus.</p>
-
+            <p>Buat akun disini jika belum mempunyai akun!!</p>
+        
         </div>
     </div>
 </div>

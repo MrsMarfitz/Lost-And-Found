@@ -1,3 +1,12 @@
+<?php
+session_start(); // <--- WAJIB ADA DI PALING ATAS
+// Jika belum login, tendang ke login page
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,7 +15,7 @@
   <title>Dashboard - Lost & Found Campus</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
-   
+    /* --- CSS ASLI KAMU (TIDAK DIUBAH) --- */
     .report-gallery {
       display: flex;
       overflow-x: auto;
@@ -69,7 +78,7 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      min-height: 50%; /* Ensure overlay is visible */
+      min-height: 50%; 
     }
 
     .report-card-overlay h4 {
@@ -91,15 +100,15 @@
 
     /* Modal styles */
     .modal {
-      display: none; /* Hidden by default */
-      position: fixed; /* Stay in place */
-      z-index: 1000; /* Sit on top */
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
       left: 0;
       top: 0;
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      overflow: auto; /* Enable scroll if needed */
-      background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+      width: 100%; 
+      height: 100%; 
+      overflow: auto; 
+      background-color: rgba(0,0,0,0.7); 
       animation: fadeIn 0.3s;
     }
 
@@ -190,11 +199,11 @@
         justify-content: flex-start;
     }
     .modal-actions .btn {
-      padding: 10px 20px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: background-color 0.2s ease;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
     }
     .modal-actions .btn-primary {
         background-color: #3b82f6;
@@ -211,7 +220,6 @@
         background-color: #c7d2fe;
     }
 
-    /* Animations */
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -237,26 +245,47 @@
         <li><a href="report_create.php">Buat Laporan</a></li>
         <li><a href="report_list.php">Daftar Laporan</a></li>
         <li><a href="profile.php">Profil Saya</a></li>
-        <li><a href="../admin/index.php">Admin Panel</a></li>
-      </ul>
+        
+        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') : ?>
+            <li><a href="../admin/index.php">Admin Panel</a></li>
+        <?php endif; ?>
+        </ul>
 
       <div class="s-bottom">
         <img src="assets/img/user.jpg" class="avatar" alt="user">
         <div>
-          <div class="small">Pengguna Aktif</div> 
+          <div class="small"><?php echo isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['full_name']) : 'Pengguna'; ?></div> 
           <a href="logout.php">Logout</a>
         </div>
       </div>
     </nav>
 
     <main class="main">
-      <header class="main-head">
+      <main class="main">
+    <header class="main-head">
         <h2>Dashboard Pengguna</h2>
-        <div class="head-actions">
-          <input class="search" placeholder="Cari barang...">
-          <a href="report_create.php" class="btn-primary small">Laporan Baru</a>
+        </header>
+
+    <?php if (isset($_GET['status']) && $_GET['status'] == 'success'): ?>
+        <div style="background: #d1fae5; color: #065f46; padding: 15px; border-radius: 8px; border: 1px solid #34d399; margin-bottom: 20px; text-align: center; font-weight: bold;">
+            ✅ <?php echo htmlspecialchars($_GET['msg'] ?? 'Login Berhasil!'); ?>
         </div>
-      </header>
+        
+        <script>
+            setTimeout(function() {
+                // Mencari elemen alert dan menghapusnya pelan-pelan
+                let alertBox = document.querySelector('div[style*="background: #d1fae5"]');
+                if (alertBox) {
+                    alertBox.style.transition = "opacity 0.5s";
+                    alertBox.style.opacity = "0";
+                    setTimeout(() => alertBox.remove(), 500);
+                }
+                // Bersihkan URL biar kalau direfresh notifnya gak muncul lagi
+                window.history.replaceState(null, null, window.location.pathname);
+            }, 3000);
+        </script>
+    <?php endif; ?>
+
 
       <section class="grid">
         <div class="card stat">

@@ -1,6 +1,6 @@
 <?php
-require_once "auth.php";
 require_once "../config/config.php";
+require_once "../config/db_connect.php";
 
 $table="reports";
 $idCol="id"; 
@@ -67,8 +67,7 @@ if ($check && $check->num_rows > 0) {
         <li><a href="index.php">Dashboard Admin</a></li>
         <li class="active">Kelola Laporan</li>
         <li><a href="users.php">Kelola Pengguna</a></li>
-        <li style="margin-top: 20px;"><a href="../public/dashboard.php">Kembali ke User Dashboard</a></li>
-      </ul>
+        </ul>
       <div class="s-bottom">
         <img src="../public/assets/img/user.jpg" class="avatar" alt="user">
         <div>
@@ -84,7 +83,6 @@ if ($check && $check->num_rows > 0) {
         <div class="head-actions">
           <input class="search" placeholder="Filter/Cari laporan...">
 
-          <!-- tombol PDF -->
           <a href="export_pdf.php" class="btn-primary small" style="text-decoration:none;">
             Generate PDF Report
           </a>

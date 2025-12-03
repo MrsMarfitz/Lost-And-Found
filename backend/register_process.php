@@ -1,88 +1,77 @@
 <?php
-// Pastikan hanya POST request yang diizinkan
+// 1. Panggil Konfigurasi
+require '../config/config.php'; 
+require '../config/db_connect.php';
+
+// 2. Pastikan hanya POST request
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    // Jika diakses langsung, arahkan ke halaman login
     header("Location: ../public/login.php"); 
     exit();
 }
 
-// 1. Panggil file konfigurasi dan koneksi database
-// PERBAIKAN PATH: Mundur satu level (..)
-require '../config/config.php'; 
+// 3. AMBIL DATA (Sesuai hasil diagnosa kamu)
+// Perhatikan baris ini: kita ambil 'nama' dari form, lalu simpan ke variabel $full_name
+$full_name = trim($_POST['nama'] ?? '');       // <--- INI KUNCINYA! Jangan ganti jadi 'full_name'
+$username  = trim($_POST['username'] ?? '');    
+$email     = trim($_POST['email'] ?? '');       
+$phone     = trim($_POST['phone'] ?? '');       
+$password  = $_POST['password'] ?? '';          
+$confirm_password = $_POST['password_confirm'] ?? ''; 
 
-// 2. Ambil data dari FORM POST
-$full_name = trim($_POST['nama'] ?? ''); 
-$username = trim($_POST['username'] ?? '');
-$email = trim($_POST['email'] ?? '');
-$phone = trim($_POST['phone'] ?? ''); 
-$password = $_POST['password'] ?? '';
-$confirm_password = $_POST['password_confirm'] ?? '';
-
-
-// --- VALIDASI DATA INPUT ---
-
-if (empty($username) || empty($email) || empty($password) || empty($full_name)) {
-    $error_msg = "Semua field wajib diisi.";
-    // Redirect Gagal dihilangkan untuk debugging
-    die("FAILURE (VALIDASI): " . $error_msg); 
+// 4. VALIDASI INPUT KOSONG
+// Karena $full_name sekarang sudah terisi (dari 'nama'), error ini tidak akan muncul lagi
+if (empty($username) || empty($email) || empty($password) || empty($full_name) || empty($phone)) {
+    $pesan = urlencode("Semua kolom wajib diisi.");
+    header("Location: ../public/register.php?status=failed&msg=$pesan");
+    exit();
 }
 
+// 5. VALIDASI PASSWORD
 if ($password !== $confirm_password) {
-    $error_msg = "Password dan Konfirmasi Password tidak cocok.";
-    // Redirect Gagal dihilangkan untuk debugging
-    die("FAILURE (VALIDASI): " . $error_msg);
+    $pesan = urlencode("Password dan Konfirmasi Password tidak sama.");
+    header("Location: ../public/register.php?status=failed&msg=$pesan");
+    exit();
 }
 
-// --- PROSES DAN KEAMANAN DATA ---
+// 6. CEK DUPLIKAT (Username/Email sudah ada belum?)
+$cek_query = "SELECT user_id FROM users WHERE username = ? OR email = ?";
+$stmt_cek = $conn->prepare($cek_query);
+$stmt_cek->bind_param("ss", $username, $email);
+$stmt_cek->execute();
+$stmt_cek->store_result(); 
 
+if ($stmt_cek->num_rows > 0) {
+    $pesan = urlencode("Username atau Email sudah terdaftar! Gunakan yang lain.");
+    header("Location: ../public/register.php?status=failed&msg=$pesan");
+    exit(); 
+}
+
+// 7. SIMPAN KE DATABASE
 $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
 $role = "user"; 
-// Kolom aktivasi dihilangkan agar sesuai dengan struktur database Anda
 
+$insert_query = "INSERT INTO users (username, email, password_hash, full_name, phone, role) VALUES (?, ?, ?, ?, ?, ?)";
+$stmt = $conn->prepare($insert_query);
 
-// 3. PREPARED STATEMENT UNTUK INSERT
-// Query disesuaikan agar cocok dengan database tanpa kolom token
-$query = "INSERT INTO users (username, email, password_hash, full_name, phone, role)
-          VALUES (?, ?, ?, ?, ?, ?)";
-
-$stmt = $conn->prepare($query);
-
-if (!$stmt) {
-    // Fatal error saat prepare query
-    error_log("MySQL Prepare Error: " . $conn->error);
-    $error_msg = "Sistem error (Prep).";
-    die("FAILURE (SISTEM): " . $error_msg);
-}
-
-$stmt->bind_param("ssssss", 
-    $username, 
-    $email, 
-    $hashed_pass, 
-    $full_name, 
-    $phone, 
-    $role
-);
-
-// 4. EKSEKUSI AMAN ($stmt->execute())
-if ($stmt->execute()) {
+if ($stmt) {
+    // Urutan harus pas: s, s, s, s, s, s (6 string)
+    // Username, Email, Password, Nama Lengkap, HP, Role
+    $stmt->bind_param("ssssss", $username, $email, $hashed_pass, $full_name, $phone, $role);
     
-    // Pendaftaran Berhasil
-    // REDIRECT DIHENTIKAN, GANTI DENGAN PESAN MANUAL
-    echo "<h1>✅ Pendaftaran BERHASIL!</h1>";
-    echo "<p>Akun <b>" . htmlspecialchars($username) . "</b> berhasil dibuat di database.</p>";
-    echo "<p>Silakan klik link di bawah ini untuk menuju halaman Login:</p>";
-    echo "<p><a href='" . ROOT_URL . "public/login.php?status=register_success'>Masuk ke Aplikasi</a></p>";
-    exit();
-
-} else {
-    // Pendaftaran Gagal (Database Error)
-    
-    if ($conn->errno == 1062) {
-        $error_msg = "Username atau Email sudah terdaftar.";
+    if ($stmt->execute()) {
+        // BERHASIL!
+        header("Location: ../public/login.php?status=success");
+        exit();
     } else {
-        $error_msg = "Terjadi kesalahan database: " . $stmt->error;
-        error_log("MySQL Execute Error: " . $stmt->error);
+        // Gagal Eksekusi SQL
+        $pesan = urlencode("Gagal database: " . $stmt->error);
+        header("Location: ../public/register.php?status=failed&msg=$pesan");
+        exit();
     }
-    
-    die("<h1>❌ Pendaftaran GAGAL</h1><p>Error: " . $error_msg . "</p>");
+} else {
+    // Gagal Prepare
+    $pesan = urlencode("Terjadi kesalahan sistem database.");
+    header("Location: ../public/register.php?status=failed&msg=$pesan");
+    exit();
 }
+?>
