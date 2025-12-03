@@ -56,10 +56,10 @@ if (isset($_GET['status'])) {
             </div>
 
             <div style="text-align: left; margin-top: 10px; font-size: 14px; color: #666;">
-                <input type="checkbox" id="remember"> <label for="remember">Remember me</label>
+                <input type="checkbox" id="remember"> <label for="remember">Ingat Saya</label>
             </div>
 
-            <button type="submit" class="btn">Sign In</button>
+            <button type="submit" class="btn">Masuk</button>
 
             <p style="margin-top:15px; text-align:center;">
                 Belum punya akun? <a href="register.php">Daftar</a>
@@ -72,7 +72,7 @@ if (isset($_GET['status'])) {
             <img src="assets/img/logo.png" alt="Logo" style="width:90px; margin-bottom:25px;">
             <h2>Hello, Friend!</h2>
             <p>Buat akun disini jika belum mempunyai akun!!</p>
-            <a href="register.php" class="side-btn">Buat Akun</a>
+        
         </div>
     </div>
 </div>

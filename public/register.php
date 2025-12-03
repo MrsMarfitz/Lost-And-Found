@@ -75,7 +75,7 @@ if (isset($_GET['status'])) {
                 <input type="password" name="password_confirm" placeholder="Konfirmasi Password" required>
             </div>
 
-            <button type="submit" class="btn">Create Account</button>
+            <button type="submit" class="btn">Buat Akun</button>
 
             <p style="margin-top:12px; font-size:14px; text-align:center;">
                 Sudah punya akun? <a href="login.php">Login</a>
@@ -87,8 +87,8 @@ if (isset($_GET['status'])) {
         <div style="text-align: center;">
             <img src="assets/img/logo.png" alt="Logo" style="width:90px; margin-bottom:25px;">
             <h2>Welcome!</h2>
-            <p>Let's help the campus community — report lost & found items quickly.</p>
-            <a href="login.php" class="side-btn">Sign In</a>
+            <p>Jika sudah mempunyai akun silahkan Log in!.</p>
+
         </div>
     </div>
 </div>
