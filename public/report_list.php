@@ -87,8 +87,11 @@ $result = $conn->query($query);
                         <?php while($row = $result->fetch_assoc()): ?>
                             <tr>
                                 <td>
-                                    <?php $foto = !empty($row['photo']) ? "uploads/".$row['photo'] : "assets/img/placeholder.jpg"; ?>
-                                    <img src="<?php echo $foto; ?>" width="50" height="50" style="object-fit:cover; border-radius:5px;">
+                                <?php 
+                                // Pastikan path 'uploads/' sesuai dengan lokasi penyimpanan file kamu
+                                $foto = !empty($row['photo']) ? "uploads/".$row['photo'] : "assets/img/placeholder.jpg"; 
+                                ?>
+                                <img src="<?php echo $foto; ?>" width="50" height="50" style="object-fit:cover; border-radius:5px;">
                                 </td>
                                 <td><?php echo htmlspecialchars($row['title']); ?></td>
                                 <td><?php echo htmlspecialchars($row['location']); ?></td>
@@ -102,7 +105,8 @@ $result = $conn->query($query);
                                     <span class="badge <?php echo $badge; ?>"><?php echo $row['status']; ?></span>
                                 </td>
                                 <td>
-                                    <a href="#" class="btn-sm">Detail</a>
+                                    <!-- Perhatikan bagian href="..." -->
+                                    <a href="report_edit.php?id=<?php echo $row['report_id']; ?>" class="btn-sm">Detail</a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>

@@ -1,6 +1,4 @@
-<?php
-require_once "auth.php";
-?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
