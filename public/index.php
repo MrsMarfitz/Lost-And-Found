@@ -1,7 +1,8 @@
 <?php
+session_start();
 
-require '../config/config.php';
-
+require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../config/db_connect.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");

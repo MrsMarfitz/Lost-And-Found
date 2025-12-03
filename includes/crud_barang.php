@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
+require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../config/db_connect.php';
+
 
 function tambahBarang($data, $file) {
     global $conn;

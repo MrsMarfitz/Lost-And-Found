@@ -1,9 +1,10 @@
 <?php
+session_start();
 
-require '../config/config.php'; 
+// kosongkan semua data session
+$_SESSION = [];
 
-$_SESSION = array();
-
+// kalau pakai cookie session, hapus juga cookienya
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,
@@ -12,8 +13,9 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
+// benar‑benar tutup session
 session_destroy();
 
+// kembali ke halaman login
 header("Location: login.php");
 exit();
-?>

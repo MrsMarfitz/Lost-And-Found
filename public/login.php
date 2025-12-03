@@ -1,59 +1,70 @@
-<?php 
-// Panggil config untuk session_start()
-require '../config/config.php';
+<?php
+session_start();
 
-// Menampilkan pesan sukses setelah pendaftaran atau pesan error login
-$status_message = "";
+require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../config/db_connect.php';
+
+$status_message = '';
 if (isset($_GET['status'])) {
-    if ($_GET['status'] == 'register_success') {
-        $status_message = "<p style='color:green; text-align:center;'>Pendaftaran berhasil! Silakan Login.</p>";
+    if ($_GET['status'] == 'registered') {
+        $status_message = 'Pendaftaran berhasil! Silakan Login.';
     } elseif ($_GET['status'] == 'login_failed' && isset($_GET['msg'])) {
-        $status_message = "<p style='color:red; text-align:center; font-weight:bold; padding: 10px; border: 1px solid red; border-radius: 4px;'>ERROR: " . htmlspecialchars($_GET['msg']) . "</p>";
+        $status_message = 'ERROR: ' . htmlspecialchars($_GET['msg']);
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Login - Lost & Found Campus</title>
-    <!-- Asumsi Anda memiliki file CSS di assets/css/style.css -->
-    <link rel="stylesheet" href="assets/css/style.css"> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Lost & Found Campus</title>
+    <link rel="stylesheet" href="assets/css/auth.css">
 </head>
-<body class="bg-gradient">
+<body>
 
-    <main class="auth-wrap">
-        <div class="auth-card">
-            <div class="auth-left">
-                <!-- Asumsi Anda memiliki logo di assets/img/logo.png -->
-                <img src="assets/img/logo.png" alt="logo" class="brand">
-                <h1>Sign In</h1>
-                <p class="muted">Masuk menggunakan akun kamu</p>
+<div class="container">
+    <div class="form-box">
+        <h2 class="title">Sign In</h2>
+        <p>Masuk menggunakan akun kamu</p>
 
+        <?php if (!empty($status_message)): ?>
+            <div style="margin:10px 0; padding:10px; border-radius:8px; background:#ffecec; color:#b91c1c; font-size:14px;">
                 <?php echo $status_message; ?>
+            </div>
+        <?php endif; ?>
 
-                <form action="../backend/login_process.php" method="POST" class="form">
-                    <input name="username_email" type="text" placeholder="Username atau Email" required>
-                    <input name="password" type="password" placeholder="Password" required>
-                    
-                    <button class="btn-primary" type="submit">Sign In</button>
-                </form>
-
-                <p class="muted center">Belum punya akun? <a href="register.php">Daftar</a></p>
+        <form action="check_user.php" method="POST">
+            <div class="input-box">
+                <input type="text" name="username_email" placeholder="Username atau Email" required>
+            </div>
+            <div class="input-box">
+                <input type="password" name="password" placeholder="Password" required>
             </div>
 
-            <aside class="auth-right">
-                <div class="auth-hero">
-                    <h2>Hello, Friend!</h2>
-                    <p>Register with your personal details to use all features of Lost & Found Campus.</p>
-                    <a href="register.php" class="btn-outline">Sign Up</a>
-                </div>
-            </aside>
-        </div>
-    </main>
+            <div style="margin-bottom:10px; font-size:12px;">
+                <label>
+                    <input type="checkbox" name="remember"> Remember me
+                </label>
+            </div>
 
-<script src="assets/js/app.js"></script>
+            <button type="submit" class="btn">Sign In</button>
+
+            <p style="margin-top:12px; font-size:14px;">
+                Belum punya akun? <a href="register.php">Daftar</a>
+            </p>
+        </form>
+    </div>
+
+    <div class="side-box">
+        <div>
+            <img src="assets/img/logo.png" alt="Logo" style="width:90px; margin-bottom:25px;">
+            <h2>Hello, Friend!</h2>
+            <p>Register with your personal details to use all features of Lost & Found Campus.</p>
+            <a href="register.php" class="side-btn">Sign Up</a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

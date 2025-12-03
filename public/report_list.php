@@ -1,5 +1,7 @@
 <?php
 require_once '../includes/crud_barang.php';
+require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../config/db_connect.php';
 $data_laporan = tampilkanSemuaBarang();
 ?>
 

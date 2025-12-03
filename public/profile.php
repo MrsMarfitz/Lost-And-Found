@@ -1,3 +1,16 @@
+<?php
+session_start();
+
+require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../config/db_connect.php';
+
+// cek sudah login atau belum
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

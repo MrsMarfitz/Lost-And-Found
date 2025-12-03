@@ -1,57 +1,69 @@
-<?php 
-// Panggil config untuk session_start() jika diperlukan
-require '../config/config.php';
+<?php
+session_start();
 
-// Menampilkan pesan error dari proses registrasi yang gagal
-$error_message = "";
+require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../config/db_connect.php';
+
+$status_message = '';
 if (isset($_GET['status']) && $_GET['status'] == 'register_failed' && isset($_GET['msg'])) {
-    $error_message = "<p style='color:red; text-align:center; font-weight:bold; padding: 10px; border: 1px solid red; border-radius: 4px;'>ERROR: " . htmlspecialchars($_GET['msg']) . "</p>";
+    $status_message = 'ERROR: ' . htmlspecialchars($_GET['msg']);
 }
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>Register - Lost & Found Campus</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Lost & Found Campus</title>
+    <link rel="stylesheet" href="assets/css/auth.css">
 </head>
-<body class="bg-gradient">
+<body>
 
-    <main class="auth-wrap">
-        <div class="auth-card">
-            <div class="auth-left">
-                <img src="assets/img/logo.png" alt="logo" class="brand">
-                <h1>Create Account</h1>
-                <p class="muted">Buat akun agar bisa melaporkan barang hilang/temuan</p>
+<div class="container">
+    <div class="form-box">
+        <h2 class="title">Create Account</h2>
+        <p>Buat akun agar bisa melaporkan barang hilang/temuan</p>
 
-                <?php echo $error_message; ?>
+        <?php if (!empty($status_message)): ?>
+            <div style="margin:10px 0; padding:10px; border-radius:8px; background:#ffecec; color:#b91c1c; font-size:14px;">
+                <?php echo $status_message; ?>
+            </div>
+        <?php endif; ?>
 
-                <!-- PENTING: Action menggunakan URL absolut PORT 8081 untuk mengatasi error 404 -->
-                <form action="..Lost-And-Found/backend/register_process.php" method="POST" class="form">
-                    <input name="nama" type="text" placeholder="Nama Lengkap" required>
-                    <input name="username" type="text" placeholder="Username" required>
-                    <input name="email" type="email" placeholder="Email" required>
-                    <input name="phone" type="text" placeholder="Nomor Telepon" required>
-                    <input name="password" type="password" placeholder="Password" required>
-                    <input name="password_confirm" type="password" placeholder="Konfirmasi Password" required>
-                    
-                    <button class="btn-primary" type="submit">Create Account</button>
-                </form>
-
-                <p class="muted center">Sudah punya akun? <a href="login.php">Login</a></p>
+        <form action="register.php" method="POST">
+            <div class="input-box">
+                <input type="text" name="full_name" placeholder="Nama Lengkap" required>
+            </div>
+            <div class="input-box">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="input-box">
+                <input type="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="input-box">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <div class="input-box">
+                <input type="password" name="confirm_password" placeholder="Konfirmasi Password" required>
             </div>
 
-            <aside class="auth-right">
-                <div class="auth-hero">
-                    <h2>Welcome!</h2>
-                    <p>Let's help the campus community — report lost & found items quickly.</p>
-                    <a href="login.php" class="btn-outline">Sign In</a>
-                </div>
-            </aside>
-        </div>
-    </main>
+            <button type="submit" class="btn">Create Account</button>
 
-<script src="assets/js/app.js"></script>
+            <p style="margin-top:12px; font-size:14px;">
+                Sudah punya akun? <a href="login.php">Login</a>
+            </p>
+        </form>
+    </div>
+
+    <div class="side-box">
+        <div>
+            <img src="assets/img/logo.png" alt="Logo" style="width:90px; margin-bottom:25px;">
+            <h2>Welcome!</h2>
+            <p>Let's help the campus community — report lost & found items quickly.</p>
+            <a href="login.php" class="side-btn">Sign In</a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

@@ -1,5 +1,7 @@
 <?php
 require_once '../includes/crud_barang.php';
+require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../config/db_connect.php';
 
 if (!isset($_GET['id'])) { header("Location: report_list.php"); exit; }
 $id = $_GET['id'];
