@@ -1,18 +1,12 @@
 <?php
-// --- NYALAKAN PELACAK ERROR (Biar gak layar putih) ---
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
 session_start();
 
-// 1. Panggil Koneksi
-// Pastikan path ini benar sesuai struktur foldermu
 require '../config/config.php';
 require '../config/db_connect.php';
 
-// 2. Cek apakah diakses lewat Jalur Belakang (GET) atau Jalur Resmi (POST)
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    // Kalau orang iseng buka file ini langsung di browser, tendang ke login
     header("Location: login.php");
     exit();
 }

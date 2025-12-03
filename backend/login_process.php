@@ -1,27 +1,26 @@
 <?php
-session_start(); // <--- WAJIB ADA DI BARIS PERTAMA!
+session_start(); 
 
 require '../config/config.php'; 
 require '../config/db_connect.php';
 
-// 1. Pastikan user masuk lewat jalur POST
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: ../public/login.php"); 
     exit();
 }
 
-// 2. Ambil data (Pastikan 'name' di HTML nanti adalah 'username_email')
+// Ambil data 
 $username_or_email = trim($_POST['username_email'] ?? ''); 
 $password_input = $_POST['password'] ?? ''; 
 
-// 3. Cari user
+// Cari user
 $query = "SELECT user_id, username, password_hash, role, full_name FROM users WHERE username = ? OR email = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("ss", $username_or_email, $username_or_email);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// 4. Proses Login
+// Proses Login
 if ($result->num_rows === 1) {
     $user = $result->fetch_assoc();
     
@@ -31,7 +30,7 @@ if ($result->num_rows === 1) {
         $_SESSION['user_id'] = $user['user_id'];
         $_SESSION['role'] = $user['role'];
         $_SESSION['username'] = $user['username'];
-        $_SESSION['full_name'] = $user['full_name']; // Tambahan biar enak dipanggil
+        $_SESSION['full_name'] = $user['full_name']; 
         $_SESSION['status'] = 'login';
         
         // -- REDIRECT --
