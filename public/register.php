@@ -1,7 +1,5 @@
 <?php
-// File: public/register.php
 
-// 1. Panggil config
 require '../config/config.php';
 
 $pesan_error = '';

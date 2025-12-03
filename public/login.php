@@ -60,8 +60,8 @@ if (isset($_GET['status'])) {
         <div>
             <img src="assets/img/logo.png" alt="Logo" style="width:90px; margin-bottom:25px;">
             <h2>Hello, Friend!</h2>
-            <p>Register with your personal details to use all features of Lost & Found Campus.</p>
-            <a href="register.php" class="side-btn">Sign Up</a>
+            <p>Buat akun disini jika belum mempunyai akun!!</p>
+            <a href="register.php" class="side-btn">Buat Akun</a>
         </div>
     </div>
 </div>
