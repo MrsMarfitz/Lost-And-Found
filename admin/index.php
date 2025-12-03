@@ -1,6 +1,7 @@
 <?php
 require_once "auth.php";
-require_once "../config/config.php";
+require_once "../config/config.php"; 
+require_once "../config/db_connect.php";
 
 $table = "reports";
 $typeCol = "type";
