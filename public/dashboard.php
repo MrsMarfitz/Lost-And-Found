@@ -1,12 +1,49 @@
 <?php
-session_start(); // <--- WAJIB ADA DI PALING ATAS
-// Jika belum login, tendang ke login page
+session_start();
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-?>
 
+require_once __DIR__ . "/../config/db_connect.php";
+
+$user_id = $_SESSION['user_id'];
+
+$sqlFound = "SELECT COUNT(*) AS total
+             FROM reports
+             WHERE user_id = ?
+               AND type = 'found'";
+$stmt = $conn->prepare($sqlFound);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$found = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
+
+$sqlLost = "SELECT COUNT(*) AS total
+            FROM reports
+            WHERE user_id = ?
+              AND type = 'lost'";
+$stmt = $conn->prepare($sqlLost);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$lost = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
+
+// Menunggu Konfirmasi -> sementara 0 (belum ada flow klaim admin)
+$waiting = 0;
+
+
+
+$sqlLatest = "SELECT report_id, title, description, location_text, date_event, status, photo, type
+              FROM reports
+              WHERE user_id = ?
+              ORDER BY created_at DESC
+              LIMIT 5";
+$stmt = $conn->prepare($sqlLatest);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result    = $stmt->get_result();
+$myReports = $result->fetch_all(MYSQLI_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -15,20 +52,16 @@ if (!isset($_SESSION['user_id'])) {
   <title>Dashboard - Lost & Found Campus</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
-    /* --- CSS ASLI KAMU (TIDAK DIUBAH) --- */
     .report-gallery {
       display: flex;
       overflow-x: auto;
       gap: 15px;
-      padding-bottom: 20px; 
+      padding-bottom: 20px;
       scrollbar-width: thin;
-      scrollbar-color: #888 #f1f1f1; 
-      -webkit-overflow-scrolling: touch; 
+      scrollbar-color: #888 #f1f1f1;
+      -webkit-overflow-scrolling: touch;
     }
-
-    .report-gallery::-webkit-scrollbar {
-      height: 8px;
-    }
+    .report-gallery::-webkit-scrollbar { height: 8px; }
     .report-gallery::-webkit-scrollbar-track {
       background: #f1f1f1;
       border-radius: 10px;
@@ -37,26 +70,21 @@ if (!isset($_SESSION['user_id'])) {
       background: #888;
       border-radius: 10px;
     }
-    .report-gallery::-webkit-scrollbar-thumb:hover {
-      background: #555;
-    }
+    .report-gallery::-webkit-scrollbar-thumb:hover { background: #555; }
 
     .report-card-item {
-      flex: 0 0 auto; 
-      width: 250px; 
-      height: 180px; 
+      flex: 0 0 auto;
+      width: 250px;
+      height: 180px;
       border-radius: 10px;
       overflow: hidden;
       position: relative;
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       transition: transform 0.2s ease-in-out;
-      background: #fff; 
+      background: #fff;
     }
-
-    .report-card-item:hover {
-      transform: translateY(-5px);
-    }
+    .report-card-item:hover { transform: translateY(-5px); }
 
     .report-card-item img {
       width: 100%;
@@ -78,9 +106,8 @@ if (!isset($_SESSION['user_id'])) {
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      min-height: 50%; 
+      min-height: 50%;
     }
-
     .report-card-overlay h4 {
       margin: 0 0 5px 0;
       font-size: 1.1em;
@@ -88,7 +115,6 @@ if (!isset($_SESSION['user_id'])) {
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .report-card-overlay .status-tag {
       background: #555;
       color: white;
@@ -97,37 +123,37 @@ if (!isset($_SESSION['user_id'])) {
       font-size: 0.8em;
       align-self: flex-start;
     }
+    .status-found  { background:#2563eb; }
+    .status-lost   { background:#f97316; }
+    .status-other  { background:#10b981; }
 
-    /* Modal styles */
     .modal {
-      display: none; 
-      position: fixed; 
-      z-index: 1000; 
+      display: none;
+      position: fixed;
+      z-index: 1000;
       left: 0;
       top: 0;
-      width: 100%; 
-      height: 100%; 
-      overflow: auto; 
-      background-color: rgba(0,0,0,0.7); 
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.7);
       animation: fadeIn 0.3s;
     }
-
     .modal-content {
       background-color: #fefefe;
-      margin: 5% auto; 
-      padding: 0; 
+      margin: 5% auto;
+      padding: 0;
       border-radius: 10px;
-      width: 80%; 
+      width: 80%;
       max-width: 900px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       position: relative;
-      overflow: hidden; 
+      overflow: hidden;
       animation: slideInUp 0.4s;
     }
-
     .modal-header {
         position: relative;
-        height: 350px; 
+        height: 350px;
         overflow: hidden;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
@@ -154,13 +180,6 @@ if (!isset($_SESSION['user_id'])) {
       justify-content: center;
       align-items: center;
     }
-    .modal-header .close-button:hover,
-    .modal-header .close-button:focus {
-      color: #bbb;
-      text-decoration: none;
-      cursor: pointer;
-    }
-
     .modal-body {
         padding: 30px;
         background-color: #fff;
@@ -171,11 +190,6 @@ if (!isset($_SESSION['user_id'])) {
         font-size: 1.8em;
         color: #333;
     }
-    .modal-body p {
-        line-height: 1.6;
-        color: #555;
-        margin-bottom: 10px;
-    }
     .modal-details {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -183,14 +197,6 @@ if (!isset($_SESSION['user_id'])) {
         margin-top: 20px;
         padding-top: 15px;
         border-top: 1px solid #eee;
-    }
-    .modal-details div {
-        font-size: 0.95em;
-    }
-    .modal-details strong {
-        display: block;
-        margin-bottom: 5px;
-        color: #333;
     }
     .modal-actions {
         margin-top: 30px;
@@ -209,25 +215,15 @@ if (!isset($_SESSION['user_id'])) {
         background-color: #3b82f6;
         color: white;
     }
-    .modal-actions .btn-primary:hover {
-        background-color: #2563eb;
-    }
     .modal-actions .btn-secondary {
         background-color: #e0e7ff;
         color: #4f46e5;
     }
-    .modal-actions .btn-secondary:hover {
-        background-color: #c7d2fe;
-    }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideInUp {
       from { transform: translateY(50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+      to   { transform: translateY(0); opacity: 1; }
     }
   </style>
 </head>
@@ -245,16 +241,17 @@ if (!isset($_SESSION['user_id'])) {
         <li><a href="report_create.php">Buat Laporan</a></li>
         <li><a href="report_list.php">Daftar Laporan</a></li>
         <li><a href="profile.php">Profil Saya</a></li>
-        
         <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') : ?>
             <li><a href="../admin/index.php">Admin Panel</a></li>
         <?php endif; ?>
-        </ul>
+      </ul>
 
       <div class="s-bottom">
         <img src="assets/img/user.jpg" class="avatar" alt="user">
         <div>
-          <div class="small"><?php echo isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['full_name']) : 'Pengguna'; ?></div> 
+          <div class="small">
+            <?php echo isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['full_name']) : 'Pengguna'; ?>
+          </div>
           <a href="logout.php">Logout</a>
         </div>
       </div>
@@ -263,21 +260,37 @@ if (!isset($_SESSION['user_id'])) {
     <main class="main">
       <header class="main-head">
         <h2>Dashboard Pengguna</h2>
-        <div class="head-actions">
-          <input class="search" placeholder="Cari barang...">
-          <a href="report_create.php" class="btn-primary small">Laporan Baru</a>
-        </div>
       </header>
+
+      <?php if (isset($_GET['status']) && $_GET['status'] == 'success'): ?>
+        <div style="background: #d1fae5; color: #065f46; padding: 15px; border-radius: 8px; border: 1px solid #34d399; margin-bottom: 20px; text-align: center; font-weight: bold;">
+          ✅ <?php echo htmlspecialchars($_GET['msg'] ?? 'Berhasil.'); ?>
+        </div>
+        <script>
+          setTimeout(function() {
+            let alertBox = document.querySelector('div[style*="background: #d1fae5"]');
+            if (alertBox) {
+              alertBox.style.transition = "opacity 0.5s";
+              alertBox.style.opacity = "0";
+              setTimeout(() => alertBox.remove(), 500);
+            }
+            window.history.replaceState(null, null, window.location.pathname);
+          }, 3000);
+        </script>
+      <?php endif; ?>
 
       <section class="grid">
         <div class="card stat">
-          <h3>Ditemukan (Barang Saya)</h3><div class="big">12</div>
+          <h3>Ditemukan (Barang Saya)</h3>
+          <div class="big"><?php echo $found; ?></div>
         </div>
         <div class="card stat">
-          <h3>Hilang (Barang Saya)</h3><div class="big">8</div>
+          <h3>Hilang (Barang Saya)</h3>
+          <div class="big"><?php echo $lost; ?></div>
         </div>
         <div class="card stat">
-          <h3>Menunggu Konfirmasi</h3><div class="big">3</div>
+          <h3>Menunggu Konfirmasi</h3>
+          <div class="big"><?php echo $waiting; ?></div>
         </div>
         <div class="card">
           <h3>Aksi Cepat</h3>
@@ -293,46 +306,46 @@ if (!isset($_SESSION['user_id'])) {
         <div class="card">
           <h3>Laporan Terbaru Saya</h3>
           <div class="report-gallery">
-            <div class="report-card-item" data-report-id="101" data-report-title="Dompet Hitam" data-report-desc="Dompet kulit warna hitam, merek XYZ, berisi KTP dan KTM. Hilang di sekitar perpustakaan." data-report-location="Perpustakaan" data-report-date="2025-11-20" data-report-status="Ditemukan" data-report-photo="assets/img/dompet.jpg">
-              <img src="assets/img/dompet.jpg" alt="Dompet Hitam">
-              <div class="report-card-overlay">
-                <h4>Dompet Hitam</h4>
-                <span class="status-tag green">Ditemukan</span>
-              </div>
-            </div>
+            <?php foreach ($myReports as $r): ?>
+              <?php
+              $photoPath = !empty($r['photo'])
+                  ? 'uploads/' . $r['photo']
+                  : 'assets/img/placeholder.jpg';
 
-            <div class="report-card-item" data-report-id="102" data-report-title="Kunci Motor XMAX" data-report-desc="Kunci motor XMAX dengan gantungan kunci berwarna biru muda. Hilang sekitar jam 1 siang di area parkiran." data-report-location="Parkiran" data-report-date="2025-11-21" data-report-status="Hilang" data-report-photo="assets/img/kunci_motor.jpg">
-              <img src="assets/img/kunci_motor.jpg" alt="Kunci Motor XMAX">
-              <div class="report-card-overlay">
-                <h4>Kunci Motor XMAX</h4>
-                <span class="status-tag red">Hilang</span>
+              if ($r['type'] === 'found') {
+                  $statusLabel = 'Barang Ditemukan';
+                  $statusClass = 'status-found';
+              } elseif ($r['type'] === 'lost') {
+                  $statusLabel = 'Barang Hilang';
+                  $statusClass = 'status-lost';
+              } else {
+                  $statusLabel = 'Status Lain';
+                  $statusClass = 'status-other';
+              }
+              ?>
+              <div class="report-card-item"
+                   data-report-id="<?php echo $r['report_id']; ?>"
+                   data-report-title="<?php echo htmlspecialchars($r['title']); ?>"
+                   data-report-desc="<?php echo htmlspecialchars($r['description']); ?>"
+                   data-report-location="<?php echo htmlspecialchars($r['location_text']); ?>"
+                   data-report-date="<?php echo htmlspecialchars($r['date_event']); ?>"
+                   data-report-status="<?php echo $statusLabel; ?>"
+                   data-report-photo="<?php echo $photoPath; ?>">
+                <img src="<?php echo $photoPath; ?>" alt="<?php echo htmlspecialchars($r['title']); ?>">
+                <div class="report-card-overlay">
+                  <h4><?php echo htmlspecialchars($r['title']); ?></h4>
+                  <span class="status-tag <?php echo $statusClass; ?>">
+                    <?php echo $statusLabel; ?>
+                  </span>
+                </div>
               </div>
-            </div>
+            <?php endforeach; ?>
 
-            <div class="report-card-item" data-report-id="103" data-report-title="Powerbank" data-report-desc="Powerbank merek ABC kapasitas 10000mAh, warna putih. Diperkirakan jatuh di ruang kelas A saat kuliah." data-report-location="Ruang Kelas A" data-report-date="2025-11-22" data-report-status="Menunggu" data-report-photo="assets/img/powerbank.jpg">
-              <img src="assets/img/powerbank.jpg" alt="Powerbank">
-              <div class="report-card-overlay">
-                <h4>Powerbank</h4>
-                <span class="status-tag orange">Menunggu</span>
-              </div>
-            </div>
-
-            <div class="report-card-item" data-report-id="104" data-report-title="Tas Laptop Merah" data-report-desc="Tas laptop warna merah, merek Lenovo, berisi charger dan mouse. Ditemukan di area kantin." data-report-location="Kantin" data-report-date="2025-11-23" data-report-status="Ditemukan" data-report-photo="assets/img/tas_laptop.jpg">
-              <img src="assets/img/tas_laptop.jpg" alt="Tas Laptop Merah">
-              <div class="report-card-overlay">
-                <h4>Tas Laptop Merah</h4>
-                <span class="status-tag green">Ditemukan</span>
-              </div>
-            </div>
-
-            <div class="report-card-item" data-report-id="105" data-report-title="Buku Catatan" data-report-desc="Buku catatan kuliah mata kuliah Matematika Diskrit, sampul biru. Hilang di area parkiran motor." data-report-location="Parkiran Motor" data-report-date="2025-11-24" data-report-status="Hilang" data-report-photo="assets/img/buku.jpg">
-              <img src="assets/img/buku.jpg" alt="Buku Catatan">
-              <div class="report-card-overlay">
-                <h4>Buku Catatan</h4>
-                <span class="status-tag red">Hilang</span>
-              </div>
-            </div>
-
+            <?php if (empty($myReports)): ?>
+              <p style="padding:10px 0;color:#6b7280;font-size:14px;">
+                Belum ada laporan. Buat laporan baru dulu.
+              </p>
+            <?php endif; ?>
           </div>
         </div>
 
@@ -369,17 +382,16 @@ if (!isset($_SESSION['user_id'])) {
         </div>
         <div class="modal-actions">
           <a href="#" id="modalEditButton" class="btn btn-primary">Edit Laporan</a>
-          <button class="btn btn-secondary">Klaim Barang Ini</button>
+          <button class="btn btn-secondary" id="modalClaimButton">Klaim Barang Ini</button>
         </div>
       </div>
     </div>
   </div>
 
-<script src="assets/js/app.js"></script>
 <script>
-  
-  var modal = document.getElementById("reportModal");
-  var span = document.getElementsByClassName("close-button")[0];
+  var modal    = document.getElementById("reportModal");
+  var span     = document.getElementsByClassName("close-button")[0];
+  var claimBtn = document.getElementById("modalClaimButton");
 
   document.querySelectorAll('.report-card-item').forEach(item => {
     item.addEventListener('click', function() {
@@ -389,33 +401,38 @@ if (!isset($_SESSION['user_id'])) {
       document.getElementById("modalReportId").innerText = "#" + this.dataset.reportId;
       document.getElementById("modalReportLocation").innerText = this.dataset.reportLocation;
       document.getElementById("modalReportDate").innerText = this.dataset.reportDate;
-      
+
       var statusTag = document.getElementById("modalReportStatus");
       statusTag.innerText = this.dataset.reportStatus;
-      statusTag.className = 'status-tag'; 
-      if (this.dataset.reportStatus === 'Ditemukan') {
-        statusTag.classList.add('green');
-      } else if (this.dataset.reportStatus === 'Hilang') {
-        statusTag.classList.add('red');
+      statusTag.className = 'status-tag';
+
+      if (this.dataset.reportStatus === 'Barang Ditemukan') {
+        statusTag.classList.add('status-found');
+      } else if (this.dataset.reportStatus === 'Barang Hilang') {
+        statusTag.classList.add('status-lost');
       } else {
-        statusTag.classList.add('orange'); 
+        statusTag.classList.add('status-other');
       }
 
-      document.getElementById("modalEditButton").href = "report_edit.php?id=" + this.dataset.reportId;
+      document.getElementById("modalEditButton").href =
+        "report_edit.php?id=" + this.dataset.reportId;
+
+      claimBtn.dataset.reportId = this.dataset.reportId;
 
       modal.style.display = "block";
     });
   });
 
-  span.onclick = function() {
-    modal.style.display = "none";
+  span.onclick = function() { modal.style.display = "none"; }
+  window.onclick = function(e) {
+    if (e.target == modal) modal.style.display = "none";
   }
 
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  }
+  claimBtn.addEventListener('click', function () {
+    var reportId = this.dataset.reportId;
+    if (!reportId) return;
+    window.location.href = "claim_report.php?id=" + reportId;
+  });
 </script>
 </body>
 </html>
