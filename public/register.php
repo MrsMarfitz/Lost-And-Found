@@ -60,7 +60,6 @@ if (isset($_GET['status']) && $_GET['status'] == 'register_failed' && isset($_GE
             <img src="assets/img/logo.png" alt="Logo" style="width:90px; margin-bottom:25px;">
             <h2>Welcome!</h2>
             <p>Let's help the campus community — report lost & found items quickly.</p>
-            <a href="login.php" class="side-btn">Sign In</a>
         </div>
     </div>
 </div>
