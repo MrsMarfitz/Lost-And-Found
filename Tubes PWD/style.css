@@ -1,0 +1,368 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  display: flex;
+  height: 100vh;
+  background-color: #f8f9fa;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 80px;
+  background-color: #ffab76;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 25px 0;
+  color: white;
+  flex-shrink: 0;
+}
+
+.sidebar .logo {
+  font-size: 28px;
+  margin-bottom: 50px;
+}
+
+.sidebar .menu {
+  list-style: none;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+  width: 100%;
+  align-items: center;
+}
+
+.sidebar .menu a,
+.sidebar .settings-link a {
+  color: #ffddcb;
+  font-size: 22px;
+  text-decoration: none;
+  transition: 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+}
+
+/* Efek Hover & Aktif pada Sidebar */
+.sidebar .menu a:hover,
+.sidebar .menu li.active a {
+  color: #ffab76;
+  background-color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar .settings-link {
+  margin-bottom: 20px;
+}
+
+/* =========================================
+   3. MAIN CONTENT AREA
+   ========================================= */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  overflow-y: auto; /* Scroll hanya di area konten */
+}
+
+/* --- HEADER --- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header .page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.header .page-title i {
+  margin-right: 15px;
+  font-size: 16px;
+  color: #999;
+  cursor: pointer;
+}
+
+.header .user-actions {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.header .icon {
+  font-size: 20px;
+  color: #777;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.header .icon:hover {
+  color: #ffab76;
+}
+
+.user-img-small {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+}
+
+/* =========================================
+   4. CONTENT BODY (Sub-Sidebar & Form)
+   ========================================= */
+.content-body {
+  display: flex;
+  flex: 1;
+  padding: 40px 50px;
+  gap: 80px;
+  max-width: 1400px;
+}
+
+/* --- SUB-SIDEBAR (Menu Navigasi Halaman) --- */
+.sub-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.sub-sidebar ul {
+  list-style: none;
+}
+
+.sub-sidebar li {
+  margin-bottom: 10px;
+}
+
+.sub-sidebar a {
+  text-decoration: none;
+  color: #888;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sub-sidebar a i {
+  margin-right: 15px;
+  width: 20px;
+  text-align: center;
+}
+
+/* State Aktif Sub-sidebar */
+.sub-sidebar li.active a {
+  color: #333;
+  background-color: #f8f9fa;
+  font-weight: 700;
+}
+
+.sub-sidebar a:hover {
+  color: #333;
+  background-color: #fafafa;
+}
+
+/* =========================================
+   5. FORM STYLING
+   ========================================= */
+.form-container {
+  flex: 1;
+  max-width: 700px; /* Membatasi lebar form agar rapi */
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.form-header h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* --- IMAGE UPLOAD STYLING (PENTING) --- */
+.profile-upload-area {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+/* Sembunyikan input asli */
+#fileInput {
+  display: none;
+}
+
+.upload-label {
+  cursor: pointer;
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.user-img-large {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: filter 0.3s ease;
+}
+
+/* Efek saat mouse di atas foto */
+.upload-label:hover .user-img-large {
+  filter: brightness(0.8);
+}
+
+.camera-icon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #ffab76;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 2px solid white;
+  pointer-events: none; /* Supaya klik tembus ke label */
+}
+
+/* --- INPUT FIELDS --- */
+.form-row {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  width: 100%;
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 14px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #333;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  background-color: #fff;
+  width: 100%;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #ffab76;
+  box-shadow: 0 0 0 3px rgba(255, 171, 118, 0.2);
+}
+
+/* --- VALIDATION ICON (Checkmark Hijau) --- */
+.validated .input-wrapper {
+  position: relative;
+}
+
+.validated .input-wrapper input {
+  padding-right: 45px; /* Ruang agar teks tidak nabrak ikon */
+}
+
+.validation-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4caf50;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+/* =========================================
+   6. ACTION BUTTONS
+   ========================================= */
+.form-actions {
+  display: flex;
+  gap: 20px;
+  margin-top: 50px;
+}
+
+.btn {
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 2px solid #ffab76;
+  color: #ffab76;
+}
+
+.btn-cancel:hover {
+  background-color: #fff5f0;
+}
+
+.btn-save {
+  background-color: #ffab76;
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 171, 118, 0.4);
+}
+
+.btn-save:hover {
+  background-color: #ff9a5b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 171, 118, 0.5);
+}
+
+.btn-save:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
