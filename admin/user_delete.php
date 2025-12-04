@@ -1,51 +1,40 @@
 <?php
 session_start();
-
-// 1. Aktifkan Error Reporting (Agar ketahuan jika ada error, bukan layar putih)
+// Aktifkan error reporting agar kalau ada error ketahuan, bukan blank
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
-    // 2. Koneksi Database (Gunakan __DIR__ agar path lebih aman)
-    // Asumsi: file ini ada di folder 'admin', dan db_connect ada di folder 'config' (naik satu level)
+    // Panggil koneksi database
     require_once __DIR__ . '/../config/db_connect.php';
 
-    // 3. Cek Login
-    if (!isset($_SESSION['user_id'])) {
+    // Cek Login Admin
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
         header("Location: ../login.php");
         exit();
     }
 
-    // 4. Proses Hapus
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         $id_to_delete = $_POST['user_id'];
 
-        // KEAMANAN: Jangan biarkan admin menghapus dirinya sendiri
+        // Cek jangan hapus diri sendiri
         if ($id_to_delete == $_SESSION['user_id']) {
-            header("Location: users.php?error=Anda tidak bisa menghapus akun yang sedang anda gunakan!");
+            header("Location: users.php?error=Tidak bisa menghapus akun sendiri!");
             exit();
         }
 
-        // Eksekusi Delete
+        // Jalankan Delete
         $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");
         $stmt->bind_param("i", $id_to_delete);
+        $stmt->execute();
 
-        if ($stmt->execute()) {
-            // SUKSES: Redirect dengan pesan success
-            header("Location: users.php?success=1"); 
-            exit();
-        } else {
-            throw new Exception("Gagal mengeksekusi query delete.");
-        }
+        header("Location: users.php?success=Pengguna berhasil dihapus");
+        exit();
     } else {
-        // Jika file dibuka langsung tanpa tombol hapus
         header("Location: users.php");
         exit();
     }
 
 } catch (Exception $e) {
-    // Jika terjadi error (misal koneksi database salah), kembali dengan pesan error
-    $error_msg = urlencode($e->getMessage());
-    header("Location: users.php?error=" . $error_msg);
-    exit();
+    echo "Error: " . $e->getMessage();
 }
 ?>
