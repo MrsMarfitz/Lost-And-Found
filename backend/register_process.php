@@ -1,4 +1,11 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// 1. Load Library PHPMailer (Sesuai nama folder kamu 'PHPMailer-master')
+require 'PHPMailer-master/src/Exception.php';
+require 'PHPMailer-master/src/PHPMailer.php';
+require 'PHPMailer-master/src/SMTP.php';
 
 require '../config/config.php'; 
 require '../config/db_connect.php';
@@ -15,36 +22,32 @@ $phone     = trim($_POST['phone'] ?? '');
 $password  = $_POST['password'] ?? '';          
 $confirm_password = $_POST['password_confirm'] ?? ''; 
 
-// 1. VALIDASI INPUT KOSONG
+
 if (empty($username) || empty($email) || empty($password) || empty($full_name) || empty($phone)) {
     $pesan = urlencode("Semua kolom wajib diisi.");
     header("Location: ../public/register.php?status=failed&msg=$pesan");
     exit();
 }
 
-// 2. VALIDASI PHONE (BARU DITAMBAHKAN)
-// Mengecek apakah input mengandung karakter selain angka 0-9
 if (!preg_match("/^[0-9]+$/", $phone)) {
-    $pesan = urlencode("Nomor telepon hanya boleh berisi angka, dilarang menggunakan huruf.");
+    $pesan = urlencode("Nomor telepon hanya boleh berisi angka.");
     header("Location: ../public/register.php?status=failed&msg=$pesan");
     exit();
 }
 
-// Opsional: Validasi panjang nomor telepon (misal minimal 10, maksimal 13 digit)
 if (strlen($phone) < 10 || strlen($phone) > 13) {
     $pesan = urlencode("Nomor telepon tidak valid (harus 10-13 digit).");
     header("Location: ../public/register.php?status=failed&msg=$pesan");
     exit();
 }
 
-// 3. VALIDASI PASSWORD
 if ($password !== $confirm_password) {
     $pesan = urlencode("Password dan Konfirmasi Password tidak sama.");
     header("Location: ../public/register.php?status=failed&msg=$pesan");
     exit();
 }
 
-// 4. CEK DUPLIKAT (Username/Email sudah ada belum?)
+// Cek Duplikat
 $cek_query = "SELECT user_id FROM users WHERE username = ? OR email = ?";
 $stmt_cek = $conn->prepare($cek_query);
 $stmt_cek->bind_param("ss", $username, $email);
@@ -57,19 +60,67 @@ if ($stmt_cek->num_rows > 0) {
     exit(); 
 }
 
-// 5. SIMPAN KE DATABASE
 $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
 $role = "user"; 
 
-$insert_query = "INSERT INTO users (username, email, password_hash, full_name, phone, role) VALUES (?, ?, ?, ?, ?, ?)";
+$token = bin2hex(random_bytes(32)); // Token acak
+$is_verified = 0; 
+
+$insert_query = "INSERT INTO users (username, email, password_hash, full_name, phone, role, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($insert_query);
 
 if ($stmt) {
-    $stmt->bind_param("ssssss", $username, $email, $hashed_pass, $full_name, $phone, $role);
+    // Parameter: sssssssi (7 string, 1 integer)
+    $stmt->bind_param("sssssssi", $username, $email, $hashed_pass, $full_name, $phone, $role, $token, $is_verified);
     
     if ($stmt->execute()) {
-        header("Location: ../public/login.php?status=success");
-        exit();
+        
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'raymondwijaya05@gmail.com'; 
+            $mail->Password   = 'pfwf pigm bbmn pvse'; 
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+
+            // Pengirim
+            $mail->setFrom('no-reply@lostfound.com', 'Admin Lost & Found');
+            $mail->addAddress($email, $full_name);
+
+            // Konten Email
+            $mail->isHTML(true);
+            $mail->Subject = 'Verifikasi Akun Lost & Found';
+            
+            // Link Verifikasi (Sesuaikan port dan folder localhost kamu)
+            $base_url = "http://localhost:8081/Lost-And-Found/public/verify.php"; 
+            $link = $base_url . "?email=" . urlencode($email) . "&token=" . $token;
+
+            $mail->Body = "
+                <h3>Halo, $full_name!</h3>
+                <p>Terima kasih telah mendaftar. Akun Anda hampir siap.</p>
+                <p>Silakan klik tombol di bawah ini untuk mengaktifkan akun Anda:</p>
+                <a href='$link' style='background-color:#3b82f6; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Verifikasi Akun Saya</a>
+                <br><br>
+                <p>Atau copy link ini: $link</p>
+            ";
+
+            $mail->send();
+            
+            // Redirect Sukses
+            $pesan = urlencode("Registrasi berhasil! Cek email Anda untuk verifikasi akun.");
+            header("Location: ../public/login.php?status=success&msg=$pesan");
+            exit();
+
+        } catch (Exception $e) {
+            // Jika email gagal dikirim
+            $pesan = urlencode("Akun dibuat, tapi gagal kirim email. Error: {$mail->ErrorInfo}");
+            header("Location: ../public/register.php?status=failed&msg=$pesan");
+            exit();
+        }
+
     } else {
         $pesan = urlencode("Gagal database: " . $stmt->error);
         header("Location: ../public/register.php?status=failed&msg=$pesan");
