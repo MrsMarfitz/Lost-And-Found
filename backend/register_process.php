@@ -15,21 +15,36 @@ $phone     = trim($_POST['phone'] ?? '');
 $password  = $_POST['password'] ?? '';          
 $confirm_password = $_POST['password_confirm'] ?? ''; 
 
-// VALIDASI INPUT KOSONG
+// 1. VALIDASI INPUT KOSONG
 if (empty($username) || empty($email) || empty($password) || empty($full_name) || empty($phone)) {
     $pesan = urlencode("Semua kolom wajib diisi.");
     header("Location: ../public/register.php?status=failed&msg=$pesan");
     exit();
 }
 
-// VALIDASI PASSWORD
+// 2. VALIDASI PHONE (BARU DITAMBAHKAN)
+// Mengecek apakah input mengandung karakter selain angka 0-9
+if (!preg_match("/^[0-9]+$/", $phone)) {
+    $pesan = urlencode("Nomor telepon hanya boleh berisi angka, dilarang menggunakan huruf.");
+    header("Location: ../public/register.php?status=failed&msg=$pesan");
+    exit();
+}
+
+// Opsional: Validasi panjang nomor telepon (misal minimal 10, maksimal 13 digit)
+if (strlen($phone) < 10 || strlen($phone) > 13) {
+    $pesan = urlencode("Nomor telepon tidak valid (harus 10-13 digit).");
+    header("Location: ../public/register.php?status=failed&msg=$pesan");
+    exit();
+}
+
+// 3. VALIDASI PASSWORD
 if ($password !== $confirm_password) {
     $pesan = urlencode("Password dan Konfirmasi Password tidak sama.");
     header("Location: ../public/register.php?status=failed&msg=$pesan");
     exit();
 }
 
-// CEK DUPLIKAT (Username/Email sudah ada belum?)
+// 4. CEK DUPLIKAT (Username/Email sudah ada belum?)
 $cek_query = "SELECT user_id FROM users WHERE username = ? OR email = ?";
 $stmt_cek = $conn->prepare($cek_query);
 $stmt_cek->bind_param("ss", $username, $email);
@@ -42,7 +57,7 @@ if ($stmt_cek->num_rows > 0) {
     exit(); 
 }
 
-// SIMPAN KE DATABASE
+// 5. SIMPAN KE DATABASE
 $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
 $role = "user"; 
 
