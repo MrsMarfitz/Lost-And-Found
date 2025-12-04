@@ -47,7 +47,6 @@ if ($password !== $confirm_password) {
     exit();
 }
 
-// Cek Duplikat
 $cek_query = "SELECT user_id FROM users WHERE username = ? OR email = ?";
 $stmt_cek = $conn->prepare($cek_query);
 $stmt_cek->bind_param("ss", $username, $email);
@@ -62,15 +61,13 @@ if ($stmt_cek->num_rows > 0) {
 
 $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
 $role = "user"; 
-
-$token = bin2hex(random_bytes(32)); // Token acak
+$token = bin2hex(random_bytes(32)); 
 $is_verified = 0; 
 
 $insert_query = "INSERT INTO users (username, email, password_hash, full_name, phone, role, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($insert_query);
 
 if ($stmt) {
-    // Parameter: sssssssi (7 string, 1 integer)
     $stmt->bind_param("sssssssi", $username, $email, $hashed_pass, $full_name, $phone, $role, $token, $is_verified);
     
     if ($stmt->execute()) {
@@ -81,20 +78,17 @@ if ($stmt) {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'raymondwijaya05@gmail.com'; 
-            $mail->Password   = 'pfwf pigm bbmn pvse'; 
+            $mail->Username   = 'isi email disini google asli';
+            $mail->Password   = 'isi token disini'; // akun google asli dan token asli!
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 
-            // Pengirim
             $mail->setFrom('no-reply@lostfound.com', 'Admin Lost & Found');
             $mail->addAddress($email, $full_name);
 
-            // Konten Email
             $mail->isHTML(true);
             $mail->Subject = 'Verifikasi Akun Lost & Found';
             
-            // Link Verifikasi (Sesuaikan port dan folder localhost kamu)
             $base_url = "http://localhost:8081/Lost-And-Found/public/verify.php"; 
             $link = $base_url . "?email=" . urlencode($email) . "&token=" . $token;
 
@@ -109,13 +103,12 @@ if ($stmt) {
 
             $mail->send();
             
-            // Redirect Sukses
             $pesan = urlencode("Registrasi berhasil! Cek email Anda untuk verifikasi akun.");
             header("Location: ../public/login.php?status=success&msg=$pesan");
             exit();
 
         } catch (Exception $e) {
-            // Jika email gagal dikirim
+            
             $pesan = urlencode("Akun dibuat, tapi gagal kirim email. Error: {$mail->ErrorInfo}");
             header("Location: ../public/register.php?status=failed&msg=$pesan");
             exit();
